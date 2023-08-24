@@ -17,7 +17,7 @@
 <script setup lang="ts">
     import { ref, onMounted } from 'vue'
 
-    import icons from '@/components/data/material_symbols'
+    import icons from '@/components/data/icons/MaterialSymbols'
 
 
 
@@ -29,13 +29,13 @@
     const trigger = ref({} as HTMLElement)
     const pos = ref({x: 0, y: 0})
 
-    const observer = new IntersectionObserver((e) => {
-        console.log(e)
-    })
+    // const observer = new IntersectionObserver((e) => {
+    //     console.log(e)
+    // })
 
-    const resizeObserver = new ResizeObserver((e) => {
-        console.log(e)
-    })
+    // const resizeObserver = new ResizeObserver((e) => {
+    //     console.log(e)
+    // })
 
     onMounted(() => {
         setTimeout(() => {

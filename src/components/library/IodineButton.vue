@@ -20,94 +20,92 @@
     </component>
 </template>
 
-<script>
+<script setup lang="ts">
+    import { computed } from 'vue'
+
     import IodineLoader from './IodineLoader.vue'
 
-    export default {
-        props: {
-            is: {
-                type: String,
-                default: 'button'
-            },
 
-            variant: {
-                type: String,
-                default: 'filled',
-            },
 
-            color: {
-                type: String,
-                default: 'primary',
-            },
-
-            label: {
-                type: String,
-                default: '',
-            },
-
-            iconLeft: {
-                type: String,
-            },
-
-            iconRight: {
-                type: String,
-            },
-
-            size: {
-                type: String,
-                default: 'normal',
-            },
-
-            border: {
-                type: Boolean,
-                default: false,
-            },
-
-            loading: {
-                type: Boolean,
-                default: false,
-            },
-
-            disabled: {
-                type: Boolean,
-                default: false,
-            },
+    const props = defineProps({
+        is: {
+            type: String,
+            default: 'button'
         },
 
-        computed: {
-            role__() {
-                return ['a', 'Link'].includes(this.is) ? 'link' : 'button'
-            },
-
-            variant__() {
-                return ['filled', 'contained', 'text'].includes(this.variant) ? this.variant : 'filled'
-            },
-
-            classes__() {
-                return [
-                    `button-size-${this.size__}`,
-                    `button-variant-${this.variant__}`,
-                    `button-color-${this.presetColor__}`,
-                    {
-                        'disabled': this.disabled,
-                        'loading': this.loading,
-                    }
-                ]
-            },
-
-            size__() {
-                return ['small', 'normal', 'large'].includes(this.size) ? this.size : 'normal'
-            },
-
-            presetColor__() {
-                return ['primary', 'secondary', 'success', 'info', 'warning', 'error'].includes(this.color) ? this.color : 'primary'
-            },
+        variant: {
+            type: String,
+            default: 'filled',
         },
 
-        components: {
-            IodineLoader,
+        color: {
+            type: String,
+            default: 'primary',
         },
-    }
+
+        label: {
+            type: String,
+            default: '',
+        },
+
+        iconLeft: {
+            type: String,
+        },
+
+        iconRight: {
+            type: String,
+        },
+
+        size: {
+            type: String,
+            default: 'normal',
+        },
+
+        border: {
+            type: Boolean,
+            default: false,
+        },
+
+        loading: {
+            type: Boolean,
+            default: false,
+        },
+
+        disabled: {
+            type: Boolean,
+            default: false,
+        },
+    })
+
+
+
+    const role__ = computed(() => {
+        return ['a', 'Link'].includes(props.is) ? 'link' : 'button'
+    })
+
+    const variant__ = computed(() => {
+        return ['filled', 'contained', 'text'].includes(props.variant) ? props.variant : 'filled'
+    })
+
+    const classes__ = computed(() => {
+        return [
+            `button-size-${size__.value}`,
+            `button-variant-${variant__.value}`,
+            `button-color-${presetColor__.value}`,
+            {
+                'disabled': props.disabled,
+                'loading': props.loading,
+            }
+        ]
+    })
+
+    const size__ = computed(() => {
+        return ['small', 'normal', 'large'].includes(props.size) ? props.size : 'normal'
+    })
+
+    const presetColor__ = computed(() => {
+        return ['primary', 'secondary', 'success', 'info', 'warning', 'error'].includes(props.color) ? props.color : 'primary'
+    })
 </script>
 
 <style lang="sass" scoped>

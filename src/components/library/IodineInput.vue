@@ -1,10 +1,10 @@
 <template>
-    <label class="mui-input mui-container" :id="nativeId || (id ? 'label-for-'+id : null)" :class="classes__">
-        <div class="box-wrapper" @click="openSelect()">
+    <label class="mui-input mui-container" :id="nativeId || (id ? 'label-for-'+id : undefined)" :class="classes">
+        <div class="box-wrapper">
             <div class="border" v-if="border"></div>
 
             <div class="side-wrapper">
-                <div class="side-icon" v-if="iconLeft__"><span>{{iconLeft__}}</span></div>
+                <div class="side-icon" v-if="iconLeft"><span>{{iconLeft}}</span></div>
                 <slot class="side-slot" v-if="$slots.left" name="left"></slot>
             </div>
 
@@ -15,39 +15,41 @@
                     <span class="prefix" v-if="prefix">{{prefix}}</span>
 
                     <div class="input-compactor">
-                        <component ref="input" class="input"
-                            :is="as__"
+                        <component
+                            ref="input"
+                            class="input"
+                            :is="'input'"
                             :pattern="pattern"
                             :autocomplete="autocomplete"
                             :spellcheck="spellcheck"
                             :disabled="disabled"
+                            :aria-disabled="disabled"
                             :required="required"
-                            :readonly="readonly__"
-                            :tabindex="tabindex__"
+                            :aria-required="required"
+                            :readonly="readonly"
+                            :tabindex="tabindex"
                             :id="id"
                             :name="name"
-                            :title="computedTitle__"
-                            :type="computedType__"
+                            :title="title"
+                            :type="computedInputType"
                             :min="min__"
                             :max="max__"
                             :minlength="min__"
                             :maxlength="max__"
                             :step="step__"
                             :autofocus="autofocus"
-                            :value="value__"
-                            :aria-required="required"
+                            :value="internalValue"
                             :aria-label="label"
-                            :aria-disabled="disabled"
-                            @input="input($event.target.value)"
+                            @input="setInput($event.target.value); emitUpdate()"
                             @focus="inputEvent('focus', $event)"
-                            @blur="inputEvent('blur', $event); handleSelectClose($event)"
+                            @blur="inputEvent('blur', $event)"
                             @keydown="inputEvent('keydown', $event)"
                             @keyup="inputEvent('keyup', $event)"
                             @keypress="inputEvent('keypress', $event)"
                             @change="inputEvent('change', $event)"
                             @keydown.esc="inputEvent('esc', $event)"
-                            @keydown.enter="inputEvent('enter', $event); handleSelectOpen($event)"
-                            @keydown.space="inputEvent('space', $event); handleSelectOpen($event)"
+                            @keydown.enter="inputEvent('enter', $event)"
+                            @keydown.space="inputEvent('space', $event)"
                         ></component>
 
                         <div class="placeholder" v-if="placeholder">{{placeholder}}</div>
@@ -58,495 +60,445 @@
             </div>
 
             <div class="side-wrapper">
-                <button type="button" class="side-button" :disabled="disabled || hideClearButton__" @click="clearInput(true)" v-if="hasClearButton__" :class="{'hide-button': hideClearButton__}">
+                <button type="button" class="side-button" :disabled="disabled || !showClearButton" @click="clearInput()" v-if="hasClearButton" :class="{'hide-button': !showClearButton}">
                     <close-icon />
                 </button>
 
-                <button type="button" class="side-button" :disabled="disabled" @click="toggleObfuscation()" v-if="hasObfuscationToggle__">
+                <button type="button" class="side-button" :disabled="disabled" @click="toggleObfuscation()" v-if="hasObfuscationToggle && showObfuscationToggle">
                     <div class="obfuscation-cross"></div>
                     <visibility-icon />
                 </button>
 
-                <div class="side-icon" v-if="type__ === 'select'">
-                    <dropdown-arrow-icon />
-                </div>
-
-                <div class="side-icon" v-if="iconRight__"><span>{{iconRight__}}</span></div>
+                <div class="side-icon" v-if="iconRight"><span>{{iconRight}}</span></div>
                 <slot class="side-slot" v-if="$slots.right" name="right"></slot>
             </div>
                 
-            <div class="progress-bar" v-if="hasScore__">
-                <div class="progress" :class="'score-'+score__"></div>
+            <div class="progress-bar" v-if="hasPasswordScore">
+                <div class="progress" :class="'score-'+passwordScore"></div>
             </div>
         </div>
 
-        <div class="select-bar" v-if="type__ === 'select'" v-show="selectOpen__">
-            <slot v-for="item in items__" :key="item" :data="item" :value="item.value" :label="item.label">
-                <button type="button" class="select-item" @click="clickSelectValue(item.value)">
-                    <div class="select-item-label">{{item.label}}</div>
-                </button>
-            </slot>
-        </div>
-
-        <div class="bottom-bar" v-if="hasBottomBar__">
-            <div class="helper-text" v-if="helperText__">{{helperText__}}</div>
-            <div class="max-text" v-if="showMax__">{{value__.length}} / {{max__}}</div>
+        <div class="bottom-bar" v-if="hasBottomBar">
+            <div class="helper-text" v-if="helperText">{{helperText}}</div>
+            <div class="max-text" v-if="hasMax && showMax">{{internalValueTextLength}} / {{max__}}</div>
         </div>
         
     </label>
 </template>
 
-<script>
-    import CloseIcon from '@/components/icons/CloseIcon.vue'
-    import VisibilityIcon from '@/components/icons/VisibilityIcon.vue'
-    import DropdownArrowIcon from '@/components/icons/DropdownArrowIcon.vue'
+<script setup lang="ts">
+    import { ref, computed, onMounted, watch } from 'vue'
 
-    export default {
-        props: {
-            modelValue: {
-                type: [String, Number],
-                default: '',
-            },
+    import CloseIcon from '@/components/library/icons/CloseIcon.vue'
+    import VisibilityIcon from '@/components/library/icons/VisibilityIcon.vue'
 
-            items: {
-                type: Array,
-                default: () => [],
-            },
 
-            type: {
-                type: String,
-                default: 'text',
-            },
 
-            id: {
-                type: String,
-                default: null,
-            },
+    const emits = defineEmits([
+        'update:modelValue',
+        'update:valid',
+        'focus',
+        'blur',
+        'keydown',
+        'keyup',
+        'keypress',
+        'change',
+        'esc',
+        'enter',
+        'space',
+        'clear',
+    ])
 
-            nativeId: {
-                type: String,
-                default: '',
-            },
-
-            name: {
-                type: String,
-            },
-
-            label: {
-                type: String,
-            },
-
-            placeholder: {
-                type: String,
-            },
-
-            helper: {
-                type: String,
-            },
-
-            title: {
-                type: String,
-            },
-
-            errorText: {
-                type: String,
-            },
-
-            iconLeft: {
-                type: String,
-            },
-
-            iconRight: {
-                type: String,
-            },
-
-            prefix: {
-                type: String,
-            },
-
-            suffix: {
-                type: String,
-            },
-
-            resize: {
-                type: String,
-                default: 'none',
-            },
-
-            clearable: {
-                type: Boolean,
-                default: false,
-            },
-
-            required: {
-                type: Boolean,
-                default: false,
-            },
-
-            disabled: {
-                type: Boolean,
-                default: false,
-            },
-
-            readonly: {
-                type: Boolean,
-                default: false,
-            },
-
-            tabindex: {
-                type: [Number, String],
-                default: 0,
-            },
-
-            pattern: {
-                type: String,
-            },
-
-            autocomplete: {
-                type: String,
-                default: 'off',
-            },
-
-            autofocus: {
-                type: Boolean,
-                default: false,
-            },
-
-            spellcheck: {
-                type: Boolean,
-                default: false,
-            },
-
-            min: {
-                type: [Number, String],
-                default: null,
-            },
-
-            max: {
-                type: [Number, String],
-                default: null,
-            },
-
-            step: {
-                type: [Number, String],
-                default: null,
-            },
-
-            border: {
-                type: Boolean,
-                default: false,
-            },
-
-            hideMax: {
-                type: Boolean,
-                default: false,
-            },
-
-            hideObfuscationToggle: {
-                type: Boolean,
-                default: false,
-            },
-
-            showPasswordScore: {
-                type: Boolean,
-                default: false,
-            },
+    const props = defineProps({
+        modelValue: {
+            type: [String, Number],
+            default: '',
+        },
+    
+        type: {
+            type: String,
+            default: 'text',
+        },
+    
+        id: {
+            type: String,
+            default: null,
+        },
+    
+        nativeId: {
+            type: String,
+            default: '',
+        },
+    
+        name: {
+            type: String,
+        },
+    
+        label: {
+            type: String,
+        },
+    
+        placeholder: {
+            type: String,
+        },
+    
+        helper: {
+            type: String,
+        },
+    
+        title: {
+            type: String,
+        },
+    
+        errorText: {
+            type: String,
+        },
+    
+        iconLeft: {
+            type: String,
+        },
+    
+        iconRight: {
+            type: String,
+        },
+    
+        prefix: {
+            type: String,
+        },
+    
+        suffix: {
+            type: String,
+        },
+    
+        resize: {
+            type: String,
+            default: 'none',
+        },
+    
+        clearable: {
+            type: Boolean,
+            default: false,
+        },
+    
+        required: {
+            type: Boolean,
+            default: false,
+        },
+    
+        disabled: {
+            type: Boolean,
+            default: false,
+        },
+    
+        readonly: {
+            type: Boolean,
+            default: false,
+        },
+    
+        tabindex: {
+            type: [Number, String],
+            default: 0,
+        },
+    
+        pattern: {
+            type: String,
+        },
+    
+        autocomplete: {
+            type: String,
+            default: 'off',
+        },
+    
+        autofocus: {
+            type: Boolean,
+            default: false,
+        },
+    
+        spellcheck: {
+            type: Boolean,
+            default: false,
+        },
+    
+        min: {
+            type: [Number, String],
+            default: null,
+        },
+    
+        max: {
+            type: [Number, String],
+            default: null,
+        },
+    
+        step: {
+            type: [Number, String],
+            default: null,
+        },
+    
+        border: {
+            type: Boolean,
+            default: false,
+        },
+    
+        hideMax: {
+            type: Boolean,
+            default: false,
+        },
+    
+        hideObfuscationToggle: {
+            type: Boolean,
+            default: false,
+        },
+    
+        showPasswordScore: {
+            type: Boolean,
+            default: false,
         },
 
-        data() {
-            return {
-                value__: '',
-                valid__: true,
-                focus__: false,
-                obfuscated__: true,
-                selectOpen__: false,
-                errors: {},
+        passwordScoreFunction: {
+            type: Function,
+            default: () => (password: string) => { return { score: 4 }},
+        },
+    })
+
+
+
+    // START: Internal variables
+    const internalValue = ref('' as string|number)
+
+    const isValid = ref(true as boolean)
+    const isFocused = ref(false as boolean)
+    const isObfuscated = ref(true as boolean)
+
+    const input = ref({} as HTMLInputElement)
+    // END: Internal variables
+
+
+    const internalValueText = computed((): string => {
+        return internalValue.value.toString()
+    })
+
+    const internalValueTextLength = computed((): number => {
+        return internalValueText.value.length
+    })
+
+    const inputType = computed(() => {
+        return ['text', 'email', 'number', 'url', 'password', 'search', 'tel'].includes(props.type) ? props.type : 'text'
+    })
+
+    const computedInputType = computed(() => {
+        if (inputType.value === 'password' && isObfuscated.value) return 'password'
+        if (inputType.value === 'password' && !isObfuscated.value) return 'text'
+
+        return inputType.value
+    })
+
+    const isInputTypeTextBased = computed((): boolean => {
+        return ['text', 'email', 'url', 'password', 'search', 'tel'].includes(inputType.value)
+    })
+
+
+
+    const hasObfuscationToggle = computed((): boolean => {
+        return inputType.value === 'password'
+    })
+
+    const showObfuscationToggle = computed((): boolean => {
+        return !props.hideObfuscationToggle
+    })
+
+
+
+    const helperText = computed((): string => {
+        // Prefer error text over helper text over empty
+        return (!isValid.value ? props.errorText : null) || props.helper || ''
+    })
+
+
+
+    const min__ = computed(() => {
+        return parseNumber(props.min)
+    })
+
+    const max__ = computed(() => {
+        return parseNumber(props.max)
+    })
+
+    const step__ = computed(() => {
+        return parseNumber(props.step)
+    })
+
+
+
+    const isFilled = computed((): boolean => {
+        return internalValueTextLength.value > 0
+    })
+
+    const isFocusedOrFilled = computed((): boolean => {
+        return isFocused.value || isFilled.value
+    })
+
+
+
+    const hasClearButton = computed((): boolean => {
+        return props.clearable || inputType.value === 'search'
+    })
+
+    const showClearButton = computed((): boolean => {
+        return isFilled.value
+    })
+
+
+
+    const hasBottomBar = computed((): boolean => {
+        return !!helperText.value || (hasMax.value && showMax.value)
+    })
+
+    const hasMax = computed((): boolean => {
+        return isInputTypeTextBased.value && !!max__.value
+    })
+
+    const showMax = computed((): boolean => {
+        return !!props.hideMax
+    })
+
+
+
+    const hasPasswordScore = computed((): boolean => {
+        return props.showPasswordScore && inputType.value === 'password'
+    })
+
+    const passwordScore = computed((): number => {
+        return props.passwordScoreFunction(internalValue.value).score
+    })
+
+
+
+    const classes = computed(() => {
+        return [
+            `input-type-${inputType.value}`,
+            {
+                'focused': isFocused.value,
+                'filled': isFilled.value,
+                'focused-or-filled': isFocusedOrFilled.value,
+                'invalid': !isValid.value,
+                'has-label': props.label,
+                'bottom-bar-space': hasBottomBar.value,
+                'disabled': props.disabled,
+                'obfuscated': isObfuscated.value,
             }
-        },
-        
-        mounted() {
-            this.instantValidation()
-        },
+        ]
+    })
+    
 
-        watch: {
-            modelValue: {
-                immediate: true,
-                handler(newValue) {
-                    this.value__ = this.parse(newValue)
-                    this.instantValidation()
-                },
-            },
 
-            // focus__() {
-            //     console.log(this.focus__)
-            // },
-        },
+    const parse = (value: string|number|null|undefined): string|number => {
+        // Return empty string if value is undefined
+        if (value === undefined) return ''
 
-        computed: {
-            as__() {
-                return this.type__ === 'textarea' ? 'textarea' : 'input'
-            },
+        // Return empty string if value is null
+        if (value === null) return ''
 
-            type__() {
-                return ['text', 'email', 'number', 'url', 'password', 'search', 'tel', 'textarea', 'select'].includes(this.type) ? this.type : 'text'
-            },
+        // Return value as number if value number
+        // Return empty string if value is not a number
+        if (inputType.value === 'number') return parseNumber(Number(value)) || ''
 
-            computedType__() {
-                if (this.type__ === 'password') return this.obfuscated__ ? 'password' : 'text'
-
-                return this.type__
-            },
-
-            items__() {
-                let items = []
-
-                if (!Array.isArray(this.items)) return items
-
-                for (const item of this.items)
-                {
-                    if (typeof item === 'object' && item.value && item.label) items.push(item)
-                    
-                    else if (['string', 'number', 'boolean'].includes(typeof item)) items.push({ value: item, label: item })
-
-                    else continue
-                }
-                
-                return items
-            },
-
-            computedTitle__() {
-                return this.title || (this.errorText && !this.valid__) ? this.errorText : ''
-            },
-
-            resize__() {
-                return ['none', 'vertical', 'horizontal', 'both'].includes(this.resize) ? this.resize : 'none'
-            },
-
-            readonly__() {
-                return this.readonly || this.type__ === 'select'
-            },
-
-            helperText__() {
-                // Prefer error text (if invalid) over helper text over null
-                return (!this.valid__ ? this.errorText : null) || this.helper || null
-            },
-
-            iconLeft__() {
-                return this.iconLeft || null
-            },
-
-            iconRight__() {
-                return this.iconRight || null
-            },
-
-            tabindex__() {
-                return Number(this.tabindex)
-            },
-
-            min__() {
-                if (!isNaN(Number(this.min)) && this.min !== null) return Number(this.min)
-
-                return null
-            },
-
-            max__() {
-                if (!isNaN(Number(this.max)) && this.max !== null) return Number(this.max)
-
-                return null
-            },
-
-            step__() {
-                if (!isNaN(Number(this.step)) && this.step !== null) return Number(this.step)
-
-                return null
-            },
-
-            filled__() {
-                return (this.value__+'').length > 0
-            },
-
-            classes__() {
-                return [
-                    `input-type-${this.type__}`,
-                    `input-resize-${this.resize__}`,
-                    {
-                        'focused': this.focus__,
-                        'filled': this.filled__,
-                        'focused-or-filled': this.focusedOrFilled__,
-                        'invalid': !this.valid__,
-                        'has-label': this.label,
-                        'bottom-bar-space': this.hasBottomBar__,
-                        'disabled': this.disabled,
-                        'obfuscated': this.type__ === 'password' && this.obfuscated__,
-                    }
-                ]
-            },
-
-            focusedOrFilled__() {
-                return (this.focus__ || this.filled__)
-            },
-
-            showMax__() {
-                if (this.hideMax) return false
-
-                // Can't show max if there's no max set
-                if (this.max__ === null) return false
-
-                // Number inputs don't need a character counter
-                if (this.type__ === 'number') return false
-
-                return true
-            },
-
-            hasClearButton__() {
-                return this.clearable || this.type__ === 'search'
-            },
-
-            hideClearButton__() {
-                return !this.filled__
-            },
-
-            hasBottomBar__() {
-                return this.helperText__ || this.showMax__
-            },
-
-
-
-            hasObfuscationToggle__() {
-                return this.type__ === 'password' && !this.hideObfuscationToggle
-            },
-
-            hasPasswordValidationLibrary__() {
-                return window.zxcvbn && typeof zxcvbn === 'function'
-            },
-
-            hasScore__() {
-                return this.showPasswordScore && this.hasPasswordValidationLibrary__ && this.type__ === 'password'
-            },
-
-            score__() {
-                if (this.type__ !== 'password') return null
-
-                if (this.hasPasswordValidationLibrary__) return window.zxcvbn(this.value__).score
-
-                return 0
-            },
-        },
-
-        methods: {
-            focus() {
-                this.$refs.input.focus()
-            },
-
-            input(value) {
-                this.value__ = this.parse(value)
-                this.$emit('update:modelValue', this.value__)
-            },
-
-            inputEvent(type, event) {
-                this.$emit(type, event)
-
-                switch (type)
-                {
-                    case 'focus': this.focus__ = true; break;
-                    case 'blur': this.focus__ = false; this.onBlurValidation(); break;
-                }
-            },
-
-            parse(value) {
-                return this.type__ === 'number' ? Number(value) : value
-            },
-
-
-
-            openSelect() {
-                this.selectOpen__ = true
-            },
-
-            handleSelectOpen(e) {
-                if (this.type__ !== 'select') return
-
-                e.preventDefault()
-                this.openSelect()
-            },
-
-            closeSelect() {
-                this.selectOpen__ = false
-            },
-
-            handleSelectClose(e) {
-                if (this.type__ !== 'select') return
-
-                e?.preventDefault()
-
-                if (this.selectOpen__)
-                {
-                    this.focus()
-                }
-            },
-
-            clickSelectValue(value) {
-                this.selectValue(value)
-                this.closeSelect()
-            },
-
-            selectValue(value) {
-                this.value__ = value
-                this.input(value)
-            },
-            
-
-
-            onBlurValidation() {
-                if (this.disabled || !this.$refs.input) return
-
-                this.valid__ = this.validate(['badInput', 'patternMismatch', 'rangeOverflow', 'rangeUnderflow', 'stepMismatch', 'tooLong', 'tooShort', 'typeMismatch', 'valueMissing'])
-
-                this.$emit('update:valid', this.valid__)
-            },
-
-            instantValidation() {
-                if (this.disabled || !this.$refs.input) return
-
-                this.valid__ = this.validate(['badInput', 'patternMismatch', 'tooLong'])
-
-                this.$emit('update:valid', this.valid__)
-            },
-
-            validate(watch = []) {
-                let validation = this.$refs.input.validity
-                let relevantValidation = []
-
-                for (const check of watch)
-                {
-                    if (validation[check] !== undefined) relevantValidation.push(validation[check])
-                }
-
-                return !relevantValidation.some(e => e === true)
-            },
-
-
-
-            toggleObfuscation() {
-                this.obfuscated__ = !this.obfuscated__
-            },
-
-            clearInput(shoudFocus) {
-                this.value__ = ''
-                this.input(this.value__)
-
-                this.$emit('clear')
-
-                if (shoudFocus) this.focus()
-            },
-        },
-
-        components: {
-            CloseIcon,
-            VisibilityIcon,
-            DropdownArrowIcon,
-        },
+        // Return value as string
+        return value.toString()
     }
+    
+    const parseNumber = (value: string|number|null): number|null => {
+        // Return fallback if value is null
+        if (value === null) return null
+
+        // Return fallback if value is not a number
+        if (!isNaN(Number(value))) return null
+
+        // Return value as number
+        return Number(value)
+    }
+    
+    const setInput = (value: string|number|null|undefined): void => {
+        internalValue.value = parse(value)
+    }
+
+    const emitUpdate = (): void => {
+        emits('update:modelValue', internalValue.value)
+    }
+
+    const emitClear = (): void => {
+        emits('clear')
+    }
+
+    const inputEvent = (type: 'update:modelValue'|'update:valid'|'focus'|'blur'|'keydown'|'keyup'|'keypress'|'change'|'esc'|'enter'|'space'|'clear', event: Event|boolean) => {
+        emits(type, event)
+
+        switch (type)
+        {
+            case 'focus': isFocused.value = true; break;
+            case 'blur': isFocused.value = false; onBlurValidation(); break;
+        }
+    }
+
+    const setFocus = (): void => {
+        input.value.focus()
+    }
+
+    const toggleObfuscation = (): void => {
+        isObfuscated.value = !isObfuscated.value
+    }
+
+
+
+    const onBlurValidation = (): void => {
+        if (props.disabled || !input.value) return
+
+        isValid.value = validate(['badInput', 'patternMismatch', 'rangeOverflow', 'rangeUnderflow', 'stepMismatch', 'tooLong', 'tooShort', 'typeMismatch', 'valueMissing'])
+
+        emits('update:valid', isValid.value)
+    }
+
+    const instantValidation = (): void => {
+        if (props.disabled || !input.value) return
+
+        isValid.value = validate(['badInput', 'patternMismatch', 'tooLong'])
+
+        emits('update:valid', isValid.value)
+    }
+
+    const validate = (watch: string[]) => {
+        // let validation = input.value.validity
+        // let relevantValidation = []
+
+        // for (const check of watch)
+        // {
+        //     if (validation[check] !== undefined) relevantValidation.push(validation[check])
+        // }
+
+        // return !relevantValidation.some(e => e === true)
+        return true
+    }
+
+
+
+    const clearInput = (): void => {
+        setInput('')
+        emitUpdate()
+        emitClear()
+        setFocus()
+    }
+
+
+
+    onMounted(() => {
+        instantValidation()
+    })
+
+    watch(() => props.modelValue, (newValue) => {
+        setInput(newValue)
+        instantValidation()
+    }, {
+        immediate: true
+    })
 </script>
 
 <style lang="sass" scoped>
@@ -640,52 +592,6 @@
                 .max-text,
                 .helper-text
                     color: var(--mui-invalid-color__)
-
-        &.input-type-textarea
-            height: auto
-
-            &.input-resize-vertical .box-wrapper
-                resize: vertical !important
-            
-            &.input-resize-horizontal .box-wrapper
-                resize: horizontal !important
-
-            &.input-resize-both .box-wrapper
-                resize: both !important
-
-            .box-wrapper
-                height: var(--base-height)
-                min-height: 2em
-                resize: none
-                overflow: hidden
-                align-items: flex-start
-                
-                .side-wrapper
-                    max-height: 3em
-
-                .input-wrapper
-                    .label
-                        height: 3em
-
-                    .inner-input-wrapper
-                        padding-top: .75em
-
-                        .input-compactor
-                            .placeholder
-                                height: auto
-
-                            .input
-                                height: calc(100% - .1em)
-                                margin-top: .1em
-
-        &.input-type-textarea.has-label
-            .box-wrapper
-                .input-wrapper
-                    .label
-                        height: 3em
-
-                    .inner-input-wrapper
-                        padding-top: 1.2em !important
 
 
 
@@ -935,47 +841,6 @@
             border-style: solid
             border-color: var(--mui-border-color__)
             pointer-events: none
-
-        .select-bar
-            width: 100%
-            padding: .5rem 0
-            background: var(--mui-background__)
-            position: absolute
-            top: 100%
-            left: 0
-            z-index: 3
-            border-radius: .325rem
-            box-shadow: 0 0 .5rem rgba(0, 0, 0, .1)
-            display: flex
-            flex-direction: column
-
-            .select-item
-                border: none
-                background: transparent
-                color: var(--mui-color__)
-                height: 2em
-                width: 100%
-                padding: 0 1em
-                display: flex
-                align-items: center
-                justify-content: flex-start
-                font-size: inherit
-                font-family: inherit
-                line-height: 1.5
-                user-select: none
-                cursor: pointer
-                word-break: break-all
-                transition: all 100ms
-
-                &:hover
-                    background: var(--mui-background-secondary__)
-                    color: var(--mui-color__)
-
-                .select-item-label
-                    flex: 1
-                    font-size: .8em
-                    display: flex
-                    justify-content: inherit
 
         .bottom-bar
             height: 1.3em

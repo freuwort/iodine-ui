@@ -1,5 +1,7 @@
 <template>
-    <div class="mui-toggle mui-container"
+    <div
+        ref="containerElement"
+        class="mui-toggle mui-container"
         :class="classes__"
         :tabindex="tabindex__"
         :role="type__"
@@ -34,7 +36,7 @@
             <div class="focus-indicator"></div>
             <div class="checkbox">
                 <transition name="checked">
-                    <svg class="checkmark" viewBox="0 0 24 24" v-show="internalValue__" :style="`--mui-stroke-offset__: ${checkmarkPathLength__}`">
+                    <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" v-show="internalValue__" :style="`--mui-stroke-offset__: ${checkmarkPathLength__}`">
                         <path ref="checkmarkPath" d="M3,12l6,6l12,-12"/>
                     </svg>
                 </transition>
@@ -56,171 +58,188 @@
     </div>
 </template>
 
-<script>
-    export default {
-        props: {
-            modelValue: {
-                type: [Boolean, String, Number],
-                default: null,
-            },
+<script setup lang="ts">
+    import { ref, computed, onMounted, watch } from 'vue'
 
-            type: {
-                type: String,
-                default: 'checkbox',
-            },
 
-            name: {
-                type: String,
-                default: '',
-            },
 
-            disabled: {
-                type: Boolean,
-                default: false,
-            },
+    const emits = defineEmits([
+        'update:modelValue',
+        'input',
+        'focus',
+        'blur',
+        'keydown',
+        'keyup',
+        'keypress',
+        'esc',
+        'space',
+        'enter',
+    ])
 
-            readonly: {
-                type: Boolean,
-                default: false,
-            },
-
-            required: {
-                type: Boolean,
-                default: false,
-            },
-
-            tabindex: {
-                type: [Number, String],
-                default: 0,
-            },
-
-            prependLabel: {
-                type: String,
-                default: '',
-            },
-
-            offValue: {
-                type: [Boolean, String, Number],
-                default: false,
-            },
-
-            label: {
-                type: String,
-                default: '',
-            },
-            
-            value: {
-                type: [Boolean, String, Number],
-                default: true,
-            },
-
-            border: {
-                type: Boolean,
-                default: false,
-            },
+    const props = defineProps({
+        modelValue: {
+            type: [Boolean, String, Number],
+            default: null,
         },
 
-        data() {
-            return {
-                focus__: false,
-                internalValue__: false,
-                checkmarkPathLength__: 0,
-            }
+        type: {
+            type: String,
+            default: 'checkbox',
         },
 
-        mounted() {
-            this.checkmarkPathLength__ = this.$refs?.checkmarkPath?.getTotalLength() || 0
+        name: {
+            type: String,
+            default: '',
         },
 
-        watch: {
-            modelValue: {
-                immediate: true,
-                handler(newValue) {
-                    this.internalValue__ = this.parseValue(newValue)
-                },
-            },
+        disabled: {
+            type: Boolean,
+            default: false,
         },
 
-        computed: {
-            value__() {
-                return this.internalValue__ ? this.value : this.offValue
-            },
-
-            classes__() {
-                return {
-                    'active': this.internalValue__,
-                    'disabled': this.disabled,
-                }
-            },
-
-            type__() {
-                return ['checkbox', 'switch'].includes(this.type) ? this.type : 'checkbox'
-            },
-
-            tabindex__() {
-                return this.disabled ? -1 : Number(this.tabindex)
-            },
-
-            dataType__() {
-                return typeof this.offValue !== 'boolean' || typeof this.value !== 'boolean' ? 'string' : 'boolean'
-            },
-
-            hasBorder__() {
-                return (this.$slots.prependLabel || this.$slots.label || this.prependLabel || this.label) && this.border
-            },
+        readonly: {
+            type: Boolean,
+            default: false,
         },
 
-        methods: {
-            parseValue(value) {
-                if (value === this.offValue) return false
+        required: {
+            type: Boolean,
+            default: false,
+        },
 
-                if (value === this.value) return true
-                
-                if (typeof value === 'boolean') return value
+        tabindex: {
+            type: [Number, String],
+            default: 0,
+        },
 
-                return false
-            },
+        prependLabel: {
+            type: String,
+            default: '',
+        },
 
-            toggle(event) {
-                if (this.shouldBounceEvent(event)) return
+        offValue: {
+            type: [Boolean, String, Number],
+            default: false,
+        },
 
-                this.internalValue__ = !this.internalValue__
-                this.$emit('update:modelValue', this.value__)
-            },
+        label: {
+            type: String,
+            default: '',
+        },
+        
+        value: {
+            type: [Boolean, String, Number],
+            default: true,
+        },
 
-            inputEvent(type, event) {
-                this.$emit(type, event)
+        border: {
+            type: Boolean,
+            default: false,
+        },
+    })
 
-                switch (type)
-                {
-                    case 'focus': this.focus__ = true; break;
-                    case 'blur': this.focus__ = false; break;
-                }
-            },
 
-            shouldBounceEvent(event) {
-                if (this.disabled) return true
 
-                if (this.readonly) return true
-                
-                var path = event.path || (event.composedPath && event.composedPath())
+    const focus__ = ref(false)
+    const internalValue__ = ref(false)
+    const containerElement = ref({} as HTMLElement)
+    const checkmarkPath = ref({} as SVGPathElement)
+    const checkmarkPathLength__ = ref(0)
 
-                for (const element of path)
-                {
-                    // Only go through child elements
-                    if (element === this.$el) return false
 
-                    // Bounce event for all elements with the "mui-container" class
-                    if ([...element.classList].includes('mui-container')) return true
 
-                    // Bounce event for interactive elements
-                    if (['A', 'BUTTON', 'INPUT', 'TEXTAREA'].includes(element.tagName)) return true
-                }
+    const value__ = computed(() => {
+        return internalValue__.value ? props.value : props.offValue
+    })
 
-                return false
-            },
+    const classes__ = computed(() => {
+        return {
+            'active': internalValue__.value,
+            'disabled': props.disabled,
+        }
+    })
+
+    const type__ = computed(() => {
+        return ['checkbox', 'switch'].includes(props.type) ? props.type : 'checkbox'
+    })
+
+    const tabindex__ = computed(() => {
+        return props.disabled ? -1 : Number(props.tabindex)
+    })
+
+    const dataType__ = computed(() => {
+        return typeof props.offValue !== 'boolean' || typeof props.value !== 'boolean' ? 'string' : 'boolean'
+    })
+
+
+
+    const parseValue = (value: string|boolean|number|null) => {
+        if (value === props.offValue) return false
+
+        if (value === props.value) return true
+        
+        if (typeof value === 'boolean') return value
+
+        return false
+    }
+
+    const toggle = (event: MouseEvent|KeyboardEvent) => {
+        if (shouldBounceEvent(event)) return
+
+        internalValue__.value = !internalValue__.value
+        emits('update:modelValue', value__.value)
+    }
+
+    const inputEvent = (type: 'update:modelValue' | 'input' | 'focus' | 'blur' | 'keydown' | 'keyup' | 'keypress' | 'esc' | 'space' | 'enter', event: MouseEvent|KeyboardEvent|FocusEvent) => {
+        emits(type, event)
+
+        switch (type)
+        {
+            case 'focus': focus__.value = true; break;
+            case 'blur': focus__.value = false; break;
         }
     }
+
+    const shouldBounceEvent = (event: MouseEvent|KeyboardEvent) => {
+        if (props.disabled) return true
+
+        if (props.readonly) return true
+        
+
+        // It is possible to pass a clickable element inside the component
+        // We have to bounce the click event if the origin is from such an element
+        // First we get the path of the event
+        let path = event.composedPath() as HTMLElement[]
+
+        // Then we go through the path
+        for (const element of path)
+        {
+            // Only go through child elements and stop at the container element
+            if (element === containerElement.value) return false
+
+            // Bounce event for all elements with the "mui-container" class
+            if ([...element.classList].includes('mui-container')) return true
+
+            // Bounce event for interactive elements
+            if (['A', 'BUTTON', 'INPUT', 'TEXTAREA'].includes(element.tagName)) return true
+        }
+
+        return false
+    }
+
+
+
+    onMounted(() => {
+        checkmarkPathLength__.value = type__.value === 'checkbox' ? checkmarkPath.value.getTotalLength() || 0 : 0
+    })
+
+
+
+    watch(() => props.modelValue, (newValue) => {
+        internalValue__.value = parseValue(newValue)
+    }, {
+        immediate: true,
+    })
 </script>
 
 <style lang="sass" scoped>

@@ -87,13 +87,10 @@
 
 <script setup lang="ts">
     import { ref, computed } from 'vue'
-    import AreaSlider from './parts/AreaSlider.vue'
+
+    import AreaSlider from './partials/AreaSlider.vue'
 
 
-
-    const emits = defineEmits([
-        'update:color',
-    ])
 
     const props = defineProps<{
         swatchPalettes: SwatchPalette[] | undefined;

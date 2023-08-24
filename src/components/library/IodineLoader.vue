@@ -4,20 +4,18 @@
     </svg>
 </template>
 
-<script>
-    export default {
-        props: {
-            type: {
-                type: String,
-                default: 'spinner',
-            },
-
-            thickness: {
-                type: Number,
-                default: 5,
-            },
+<script setup lang="ts">
+    defineProps({
+        type: {
+            type: String,
+            default: 'spinner',
         },
-    }
+
+        thickness: {
+            type: Number,
+            default: 5,
+        },
+    })
 </script>
 
 <style lang="sass" scoped>

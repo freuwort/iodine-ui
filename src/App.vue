@@ -3,16 +3,16 @@
         <div class="nav-row">
             <div class="limiter main">
                 <RouterLink to="/" style="padding: 0">
-                    <img src="/images/logo.svg" alt="Iodine UI Logo" title="Iodine UI home" class="logo">
+                    <img src="/images/iodine_logo.svg" alt="Iodine UI Logo" title="Iodine UI home" class="logo">
                     Iodine UI
                 </RouterLink>
     
                 <div class="spacer"></div>
     
-                <RouterLink to="/components">Components</RouterLink>
-                <!-- <RouterLink to="/about">Design Guide</RouterLink> -->
-                <RouterLink to="/about">Get Started</RouterLink>
                 <RouterLink to="/about">Installation</RouterLink>
+                <RouterLink to="/about">Get Started</RouterLink>
+                <RouterLink to="/environment">Environment</RouterLink>
+                <RouterLink to="/components">Components</RouterLink>
 
                 <div class="divider"></div>
     
@@ -57,13 +57,19 @@
         </div>
     </header>
 
-    <RouterView />
+    <main>
+        <RouterView />
+    </main>
 
     <footer>
         <div class="links-row"></div>
         <div class="copyright-row">
             <div class="limiter">
-                &copy; 2023 Iodine UI
+                <div class="flex gap-2 v-center">
+                    <span>&copy; {{ new Date().getFullYear() }} Freuwort</span>
+                    <div class="spacer"></div>
+                    <span>Licensed under the MIT license</span>
+                </div>
             </div>
         </div>
     </footer>
@@ -120,7 +126,7 @@
                 align-items: center
                 color: rgb(var(--color-heading))
                 text-decoration: none
-                font-size: 1rem
+                font-size: .9rem
                 font-family: var(--font-heading)
                 transition: color 50ms ease-in-out
 
@@ -196,6 +202,9 @@
                     border-radius: inherit
                     border: 2px solid rgb(var(--color-background-soft))
 
+    main
+        padding-block: var(--height-header)
+        
     footer
         width: 100%
         background-color: rgb(var(--color-background))

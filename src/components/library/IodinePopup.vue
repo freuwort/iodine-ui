@@ -24,7 +24,7 @@
     import { ref } from 'vue'
     import { FocusTrap } from 'focus-trap-vue'
 
-    import CloseIcon from '@/components/icons/CloseIcon.vue'
+    import CloseIcon from '@/components/library/icons/CloseIcon.vue'
 
 
     const emits = defineEmits([
