@@ -1,9 +1,9 @@
 <template>
     <Teleport to="body">
         <FocusTrap :active="isOpen" @deactivate="close(true)">
-            <div class="popup-outer-wrapper" :class="{'open': isOpen}" :style="`--blur: ${backdropBlur}; --background: ${backdropColor};`" @click.self.exact="closeOnBackdropClick()">
-                <div class="popup-inner-wrapper" :style="`max-width: ${maxWidth};`">
-                    <div class="popup-content" :style="`background-color: ${modalColor};`">
+            <div class="iod-container iod-popup popup-outer-wrapper" :class="{'open': isOpen}" @click.self.exact="closeOnBackdropClick()">
+                <div class="popup-inner-wrapper">
+                    <div class="popup-content">
                         <slot></slot>
                     </div>
     
@@ -44,22 +44,6 @@
             type: Boolean,
             default: false,
         },
-        backdropColor: {
-            type: String,
-            default: 'rgb(61 65 69 / 80%)',
-        },
-        backdropBlur: {
-            type: String,
-            default: '20px',
-        },
-        maxWidth: {
-            type: String,
-            default: '700px',
-        },
-        modalColor: {
-            type: String,
-            default: '#fff',
-        },
     })
 
     const isOpen = ref(false)
@@ -89,7 +73,12 @@
 </script>
 
 <style lang="sass" scoped>
-    .popup-outer-wrapper
+    .iod-container.iod-popup
+        --local-blur: 20px
+        --local-max-width: 700px
+        --local-color-backdrop: rgb(61 65 69 / 80%)
+        --local-color-modal: var(--color-background)
+
         position: fixed
         z-index: 10000
         bottom: 0
@@ -101,12 +90,16 @@
         perspective: 1000px
         transition: background 300ms
         overflow-y: hidden
+        box-sizing: border-box
+
+        *
+            box-sizing: inherit
 
         &.open
             pointer-events: all
             overflow-y: auto
-            background: var(--background)
-            backdrop-filter: blur(var(--blur))
+            background: var(--local-color-backdrop)
+            backdrop-filter: blur(var(--local-blur))
                 
             .popup-inner-wrapper
                 transform: rotateX(0deg)
@@ -116,7 +109,7 @@
             position: relative
             z-index: 1
             width: calc(100% - 2rem)
-            max-width: 700px
+            max-width: var(--local-max-width)
             margin: 6rem auto
             display: flex
             flex-direction: column
@@ -195,7 +188,7 @@
                         letter-spacing: .05rem
 
             .popup-content
-                background: var(--color-background)
+                background: var(--local-color-modal)
                 border-radius: var(--radius-m)
                 display: flex
                 flex-direction: column

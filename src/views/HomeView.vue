@@ -44,8 +44,8 @@
         justify-content: center
         flex-direction: column
         gap: 1rem
-        background-color: rgb(var(--color-background-soft))
-        border-bottom: 2px solid rgb(var(--color-primary))
+        background-color: var(--color-background-soft)
+        border-bottom: 2px solid var(--color-primary)
 
         video
             position: absolute
@@ -64,7 +64,7 @@
 
             span
                 font-weight: inherit
-                color: rgb(var(--color-primary))
+                color: var(--color-primary)
 
         p
             color: #ffffffcc

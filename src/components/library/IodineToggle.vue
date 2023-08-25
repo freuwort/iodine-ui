@@ -1,11 +1,11 @@
 <template>
     <div
         ref="containerElement"
-        class="mui-toggle mui-container"
-        :class="classes__"
-        :tabindex="tabindex__"
+        class="iod-container iod-toggle"
+        :class="classes"
+        :tabindex="tabindex"
         :role="type__"
-        :aria-checked="internalValue__"
+        :aria-checked="internalValue"
         :disabled="disabled"
         :aria-disabled="disabled"
         :aria-readonly="readonly"
@@ -23,10 +23,10 @@
             readonly
             :name="name"
             :value="value__"
-            :checked="internalValue__"
+            :checked="internalValue"
             :disabled="disabled"
             :required="required"
-            :type="dataType__ === 'boolean' ? 'checkbox' : 'hidden'">
+            :type="dataType === 'boolean' ? 'checkbox' : 'hidden'">
         
         <div class="label" v-if="$slots.prependLabel || prependLabel">
             <slot name="prependLabel">{{prependLabel}}</slot>
@@ -36,7 +36,7 @@
             <div class="focus-indicator"></div>
             <div class="checkbox">
                 <transition name="checked">
-                    <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" v-show="internalValue__" :style="`--mui-stroke-offset__: ${checkmarkPathLength__}`">
+                    <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" v-show="internalValue" :style="`--mui-stroke-offset__: ${checkmarkPathLength}`">
                         <path ref="checkmarkPath" d="M3,12l6,6l12,-12"/>
                     </svg>
                 </transition>
@@ -81,57 +81,46 @@
             type: [Boolean, String, Number],
             default: null,
         },
-
         type: {
             type: String,
             default: 'checkbox',
         },
-
         name: {
             type: String,
             default: '',
         },
-
         disabled: {
             type: Boolean,
             default: false,
         },
-
         readonly: {
             type: Boolean,
             default: false,
         },
-
         required: {
             type: Boolean,
             default: false,
         },
-
         tabindex: {
             type: [Number, String],
             default: 0,
         },
-
         prependLabel: {
             type: String,
             default: '',
         },
-
         offValue: {
             type: [Boolean, String, Number],
             default: false,
         },
-
         label: {
             type: String,
             default: '',
         },
-        
         value: {
             type: [Boolean, String, Number],
             default: true,
         },
-
         border: {
             type: Boolean,
             default: false,
@@ -140,35 +129,31 @@
 
 
 
-    const focus__ = ref(false)
-    const internalValue__ = ref(false)
+    const isFocused = ref(false as boolean)
+    const internalValue = ref(false as boolean)
     const containerElement = ref({} as HTMLElement)
     const checkmarkPath = ref({} as SVGPathElement)
-    const checkmarkPathLength__ = ref(0)
+    const checkmarkPathLength = ref(0 as number)
 
 
 
-    const value__ = computed(() => {
-        return internalValue__.value ? props.value : props.offValue
+    const value__ = computed((): boolean|string|number|null|undefined => {
+        return internalValue.value ? props.value : props.offValue
     })
 
-    const classes__ = computed(() => {
-        return {
-            'active': internalValue__.value,
-            'disabled': props.disabled,
-        }
-    })
-
-    const type__ = computed(() => {
+    const type__ = computed((): string => {
         return ['checkbox', 'switch'].includes(props.type) ? props.type : 'checkbox'
     })
 
-    const tabindex__ = computed(() => {
-        return props.disabled ? -1 : Number(props.tabindex)
+    const dataType = computed((): string => {
+        return typeof props.offValue !== 'boolean' || typeof props.value !== 'boolean' ? 'string' : 'boolean'
     })
 
-    const dataType__ = computed(() => {
-        return typeof props.offValue !== 'boolean' || typeof props.value !== 'boolean' ? 'string' : 'boolean'
+    const classes = computed((): object => {
+        return {
+            'active': internalValue.value,
+            'disabled': props.disabled,
+        }
     })
 
 
@@ -183,24 +168,24 @@
         return false
     }
 
-    const toggle = (event: MouseEvent|KeyboardEvent) => {
+    const toggle = (event: MouseEvent|KeyboardEvent): void => {
         if (shouldBounceEvent(event)) return
 
-        internalValue__.value = !internalValue__.value
+        internalValue.value = !internalValue.value
         emits('update:modelValue', value__.value)
     }
 
-    const inputEvent = (type: 'update:modelValue' | 'input' | 'focus' | 'blur' | 'keydown' | 'keyup' | 'keypress' | 'esc' | 'space' | 'enter', event: MouseEvent|KeyboardEvent|FocusEvent) => {
+    const inputEvent = (type: 'update:modelValue' | 'input' | 'focus' | 'blur' | 'keydown' | 'keyup' | 'keypress' | 'esc' | 'space' | 'enter', event: MouseEvent|KeyboardEvent|FocusEvent): void => {
         emits(type, event)
 
         switch (type)
         {
-            case 'focus': focus__.value = true; break;
-            case 'blur': focus__.value = false; break;
+            case 'focus': isFocused.value = true; break;
+            case 'blur': isFocused.value = false; break;
         }
     }
 
-    const shouldBounceEvent = (event: MouseEvent|KeyboardEvent) => {
+    const shouldBounceEvent = (event: MouseEvent|KeyboardEvent): boolean => {
         if (props.disabled) return true
 
         if (props.readonly) return true
@@ -229,36 +214,27 @@
 
 
 
-    onMounted(() => {
-        checkmarkPathLength__.value = type__.value === 'checkbox' ? checkmarkPath.value.getTotalLength() || 0 : 0
+    onMounted((): void => {
+        checkmarkPathLength.value = type__.value === 'checkbox' ? checkmarkPath.value.getTotalLength() || 0 : 0
     })
 
 
 
-    watch(() => props.modelValue, (newValue) => {
-        internalValue__.value = parseValue(newValue)
+    watch(() => props.modelValue, (newValue): void => {
+        internalValue.value = parseValue(newValue)
     }, {
         immediate: true,
     })
 </script>
 
 <style lang="sass" scoped>
-    *
-        box-sizing: border-box
+    .iod-container.iod-toggle
+        --local-color-off: var(--color-border)
+        --local-color-off-text: var(--color-on-primary)
+        --local-color-on: var(--color-primary)
+        --local-color-on-text: var(--color-on-primary)
 
-    .mui-toggle.mui-container
         font-size: 1rem
-        --mui-border-color__: var(--mui-border-color, #888)
-        
-        --mui-background__: var(--mui-background, #fff)
-        --mui-color__: var(--mui-color-light, #666)
-
-        --mui-active-background__: var(--primary, #650db4)
-        --mui-active-color__: var(--primary-contrast, #fff)
-
-        --mui-disabled-background__: var(--mui-disabled-background, #f0f0f0)
-        --mui-disabled-color__: var(--mui-disabled-color, #777)
-
         position: relative
         vertical-align: top
         display: inline-flex
@@ -270,21 +246,22 @@
         min-height: 2.5em
         cursor: pointer
         user-select: none
-        border-radius: .325em
+        border-radius: var(--radius-m)
+        box-sizing: border-box
+
+        *
+            box-sizing: inherit
 
         &.active
-            --mui-background__: var(--mui-active-background__, #650db4)
-            --mui-color__: var(--mui-active-color__, #fff)
-
             .checkbox
-                background: var(--mui-background__)
-                border-color: var(--mui-background__)
-                color: var(--mui-color__)
+                background: var(--local-color-on)
+                border-color: var(--local-color-on)
+                color: var(--local-color-on-text)
 
             .switchbox
-                border-color: var(--mui-background__)
-                background: var(--mui-background__)
-                color: var(--mui-color__)
+                border-color: var(--local-color-on)
+                background: var(--local-color-on)
+                color: var(--local-color-on-text)
 
                 .switchdot-wrapper
                     left: calc(100% - 1.25em + 4px)
@@ -293,7 +270,7 @@
 
         &:hover:not(.disabled)
             .focus-indicator
-                opacity: .1
+                opacity: .075
                 transform: translate(-50%, -50%) scale(1)
 
 
@@ -302,25 +279,28 @@
             outline: none
             
             .focus-indicator
-                opacity: .2
+                opacity: .15
                 transform: translate(-50%, -50%) scale(1)
 
 
 
         &.disabled
             cursor: initial
-            --mui-background__: var(--mui-disabled-background__)
-            --mui-color__: var(--mui-disabled-color__)
 
             .checkbox
-                border-color: var(--mui-color__)
-                background: var(--mui-background__)
-                color: var(--mui-color__)
+                border-color: var(--color-background-disabled)
+                background: transparent
+                color: var(--color-text-soft-disabled)
 
             .switchbox
-                border-color: var(--mui-color__)
-                background: var(--mui-color__)
-                color: var(--mui-background__)
+                border-color: var(--color-background-disabled)
+                background: var(--color-background-disabled)
+                color: var(--color-text-soft-disabled)
+
+        &.disabled.active
+            .checkbox
+                border-color: var(--color-background-disabled)
+                background: var(--color-background-disabled)
 
 
 
@@ -343,9 +323,9 @@
             border: 2px solid transparent
             transition: all 50ms ease-in-out
 
-            border-color: var(--mui-color__)
+            border-color: var(--local-color-off)
             background: transparent
-            color: var(--mui-color__)
+            color: var(--local-color-off-text)
 
             .checkmark
                 height: 100%
@@ -355,7 +335,7 @@
                 left: 0
                 text-align: center
                 color: inherit
-                transition: stroke-dashoffset 80ms linear //cubic-bezier(0.80, 0, 0.2, 1)
+                transition: stroke-dashoffset 80ms linear
                 stroke-dasharray: var(--mui-stroke-offset__)
                 stroke-dashoffset: 0
                 fill: none
@@ -378,9 +358,9 @@
             transition: all 50ms ease-in-out
             position: relative !important
 
-            border-color: var(--mui-color__)
-            background: var(--mui-color__)
-            color: var(--mui-background__)
+            border-color: var(--local-color-off)
+            background: var(--local-color-off)
+            color: var(--local-color-off-text)
 
             .switchdot-wrapper
                 height: calc(1.25em - 4px)
@@ -408,7 +388,7 @@
             left: 50%
             transform: translate(-50%, -50%) scale(.6)
             transition: all 100ms ease-in-out
-            background: var(--mui-active-background__)
+            background: var(--color-text)
             opacity: 0
             pointer-events: none
 
@@ -416,7 +396,6 @@
             display: none
         
         .label
-            // font-size: 0.8em
             line-height: 1.25
             user-select: none
             flex: none
@@ -428,6 +407,6 @@
             top: 0
             left: 0
             border-radius: inherit
-            border: 1px solid var(--mui-border-color__)
+            border: 1px solid var(--color-border)
             pointer-events: none
 </style>

@@ -13,8 +13,4 @@
 </script>
 
 <style lang="sass" scoped>
-    h2
-        padding-bottom: .5rem
-        margin-bottom: 1rem
-        border-bottom: 2px solid rgb(var(--color-border))
 </style>

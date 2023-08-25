@@ -1,7 +1,8 @@
 <template>
-    <label class="mui-input mui-container" :id="nativeId || (id ? 'label-for-'+id : undefined)" :class="classes">
+    <label class="iod-container iod-input" :id="nativeId || (id ? 'label-for-'+id : undefined)" :class="classes">
         <div class="box-wrapper">
             <div class="border" v-if="border"></div>
+            <div class="tint-background"></div>
 
             <div class="side-wrapper">
                 <div class="side-icon" v-if="iconLeft"><span>{{iconLeft}}</span></div>
@@ -87,7 +88,7 @@
 </template>
 
 <script setup lang="ts">
-    import { ref, computed, onMounted, watch } from 'vue'
+    import { ref, computed, onMounted, watch, PropType } from 'vue'
 
     import CloseIcon from '@/components/library/icons/CloseIcon.vue'
     import VisibilityIcon from '@/components/library/icons/VisibilityIcon.vue'
@@ -111,151 +112,117 @@
 
     const props = defineProps({
         modelValue: {
-            type: [String, Number],
+            type: null as unknown as PropType<string | number | null>,
             default: '',
         },
-    
         type: {
             type: String,
             default: 'text',
         },
-    
         id: {
             type: String,
             default: null,
         },
-    
         nativeId: {
             type: String,
             default: '',
         },
-    
         name: {
             type: String,
         },
-    
         label: {
             type: String,
         },
-    
         placeholder: {
             type: String,
         },
-    
         helper: {
             type: String,
         },
-    
         title: {
             type: String,
         },
-    
         errorText: {
             type: String,
         },
-    
         iconLeft: {
             type: String,
         },
-    
         iconRight: {
             type: String,
         },
-    
         prefix: {
             type: String,
         },
-    
         suffix: {
             type: String,
         },
-    
-        resize: {
-            type: String,
-            default: 'none',
-        },
-    
         clearable: {
             type: Boolean,
             default: false,
         },
-    
         required: {
             type: Boolean,
             default: false,
         },
-    
         disabled: {
             type: Boolean,
             default: false,
         },
-    
         readonly: {
             type: Boolean,
             default: false,
         },
-    
         tabindex: {
             type: [Number, String],
             default: 0,
         },
-    
         pattern: {
             type: String,
         },
-    
         autocomplete: {
             type: String,
             default: 'off',
         },
-    
         autofocus: {
             type: Boolean,
             default: false,
         },
-    
         spellcheck: {
             type: Boolean,
             default: false,
         },
-    
         min: {
             type: [Number, String],
             default: null,
         },
-    
         max: {
             type: [Number, String],
             default: null,
         },
-    
         step: {
             type: [Number, String],
             default: null,
         },
-    
         border: {
             type: Boolean,
             default: false,
         },
-    
         hideMax: {
             type: Boolean,
             default: false,
         },
-    
         hideObfuscationToggle: {
             type: Boolean,
             default: false,
         },
-    
         showPasswordScore: {
             type: Boolean,
             default: false,
         },
-
         passwordScoreFunction: {
             type: Function,
+            // eslint-disable-next-line
             default: () => (password: string) => { return { score: 4 }},
         },
     })
@@ -281,11 +248,11 @@
         return internalValueText.value.length
     })
 
-    const inputType = computed(() => {
+    const inputType = computed((): string => {
         return ['text', 'email', 'number', 'url', 'password', 'search', 'tel'].includes(props.type) ? props.type : 'text'
     })
 
-    const computedInputType = computed(() => {
+    const computedInputType = computed((): string => {
         if (inputType.value === 'password' && isObfuscated.value) return 'password'
         if (inputType.value === 'password' && !isObfuscated.value) return 'text'
 
@@ -315,15 +282,15 @@
 
 
 
-    const min__ = computed(() => {
+    const min__ = computed((): number|null => {
         return parseNumber(props.min)
     })
 
-    const max__ = computed(() => {
+    const max__ = computed((): number|null => {
         return parseNumber(props.max)
     })
 
-    const step__ = computed(() => {
+    const step__ = computed((): number|null => {
         return parseNumber(props.step)
     })
 
@@ -373,7 +340,7 @@
 
 
 
-    const classes = computed(() => {
+    const classes = computed((): object => {
         return [
             `input-type-${inputType.value}`,
             {
@@ -391,6 +358,7 @@
     
 
 
+    // START: Input & parse functions
     const parse = (value: string|number|null|undefined): string|number => {
         // Return empty string if value is undefined
         if (value === undefined) return ''
@@ -400,7 +368,7 @@
 
         // Return value as number if value number
         // Return empty string if value is not a number
-        if (inputType.value === 'number') return parseNumber(Number(value)) || ''
+        if (inputType.value === 'number') return parseNumber(Number(value)) ?? ''
 
         // Return value as string
         return value.toString()
@@ -411,7 +379,7 @@
         if (value === null) return null
 
         // Return fallback if value is not a number
-        if (!isNaN(Number(value))) return null
+        if (isNaN(Number(value))) return null
 
         // Return value as number
         return Number(value)
@@ -420,7 +388,11 @@
     const setInput = (value: string|number|null|undefined): void => {
         internalValue.value = parse(value)
     }
+    // END: Input & parse functions
 
+
+
+    // START: Emits & events
     const emitUpdate = (): void => {
         emits('update:modelValue', internalValue.value)
     }
@@ -429,16 +401,20 @@
         emits('clear')
     }
 
-    const inputEvent = (type: 'update:modelValue'|'update:valid'|'focus'|'blur'|'keydown'|'keyup'|'keypress'|'change'|'esc'|'enter'|'space'|'clear', event: Event|boolean) => {
+    const inputEvent = (type: 'update:modelValue'|'update:valid'|'focus'|'blur'|'keydown'|'keyup'|'keypress'|'change'|'esc'|'enter'|'space'|'clear', event: Event|boolean): void => {
         emits(type, event)
 
         switch (type)
         {
             case 'focus': isFocused.value = true; break;
-            case 'blur': isFocused.value = false; onBlurValidation(); break;
+            case 'blur': isFocused.value = false; validateOnBlur(); break;
         }
     }
+    // END: Emits & events
 
+
+
+    // START: Misc
     const setFocus = (): void => {
         input.value.focus()
     }
@@ -446,40 +422,49 @@
     const toggleObfuscation = (): void => {
         isObfuscated.value = !isObfuscated.value
     }
+    // END: Misc
 
 
 
-    const onBlurValidation = (): void => {
+    // START: Validation
+    const validateOnBlur = (): void => {
+        validate(['badInput', 'patternMismatch', 'rangeOverflow', 'rangeUnderflow', 'stepMismatch', 'tooLong', 'tooShort', 'typeMismatch', 'valueMissing'])
+    }
+
+    const validateInstantly = (): void => validate(['badInput', 'patternMismatch', 'tooLong'])
+    
+    const validate = (watchForKey: string[]): void => {
+        // Return if input is disabled or empty
         if (props.disabled || !input.value) return
+        
+        // Get validity state
+        let validityState = input.value.validity
 
-        isValid.value = validate(['badInput', 'patternMismatch', 'rangeOverflow', 'rangeUnderflow', 'stepMismatch', 'tooLong', 'tooShort', 'typeMismatch', 'valueMissing'])
+        // Convert validity state to json object
+        let validityStateObject = {
+            badInput: !!validityState?.badInput,
+            patternMismatch: !!validityState?.patternMismatch,
+            rangeOverflow: !!validityState?.rangeOverflow,
+            rangeUnderflow: !!validityState?.rangeUnderflow,
+            stepMismatch: !!validityState?.stepMismatch,
+            tooLong: !!validityState?.tooLong,
+            tooShort: !!validityState?.tooShort,
+            typeMismatch: !!validityState?.typeMismatch,
+            valid: !!validityState?.valid,
+            valueMissing: !!validityState?.valueMissing,
+        }
 
+        // Select all keys of the validityStateObject that are in the watchForKey array and check if all of them are false meaning the input is valid
+        isValid.value = Object.values(Object.fromEntries(Object.entries(validityStateObject).filter(([key]) => watchForKey.includes(key)))).every((value) => value === false)
+
+        // Emit valid event
         emits('update:valid', isValid.value)
     }
-
-    const instantValidation = (): void => {
-        if (props.disabled || !input.value) return
-
-        isValid.value = validate(['badInput', 'patternMismatch', 'tooLong'])
-
-        emits('update:valid', isValid.value)
-    }
-
-    const validate = (watch: string[]) => {
-        // let validation = input.value.validity
-        // let relevantValidation = []
-
-        // for (const check of watch)
-        // {
-        //     if (validation[check] !== undefined) relevantValidation.push(validation[check])
-        // }
-
-        // return !relevantValidation.some(e => e === true)
-        return true
-    }
+    // END: Validation
 
 
 
+    // Clear input value
     const clearInput = (): void => {
         setInput('')
         emitUpdate()
@@ -489,51 +474,38 @@
 
 
 
-    onMounted(() => {
-        instantValidation()
+    // On mounted
+    onMounted((): void => {
+        validateInstantly()
     })
 
-    watch(() => props.modelValue, (newValue) => {
+    // Value watcher
+    watch(() => props.modelValue, (newValue): void => {
         setInput(newValue)
-        instantValidation()
+        validateInstantly()
     }, {
         immediate: true
     })
 </script>
 
 <style lang="sass" scoped>
-    *
-        box-sizing: border-box
+    .iod-container.iod-input
+        --gap-affix: 0em
 
-    .mui-input.mui-container
         font-size: 1rem
-        --base-height: 3em
-        --mui-background__: var(--mui-background, #fff)
-        --mui-background-secondary__: var(--mui-background-secondary, #00000020)
-        --mui-border-color__: var(--mui-border-color, #888)
-        --mui-color__: var(--mui-color, #000)
-        --mui-color-light__: var(--mui-color-light, #666)
-
-        --mui-disabled-background__: var(--mui-disabled-background, #fafafa)
-        --mui-disabled-border-color__: var(--mui-disabled-border-color, #aaa)
-
-        --mui-focused-border-color__: var(--mui-focused-border-color, #222)
-
-        --mui-invalid-color__: var(--mui-invalid-color, #f00)
-        --mui-invalid-border-color__: var(--mui-invalid-border-color, #f00)
-
-        --mui-icon-font__: var(--mui-icon-font, 'Material Icons')
-        --mui-affix-gap__: var(--mui-affix-gap, 0em)
-
         height: 3rem
         display: flex
-        background: var(--mui-background__)
-        border-radius: .325em
+        background: var(--color-background-soft)
+        border-radius: var(--radius-m)
         position: relative
+        box-sizing: border-box
+
+        *
+            box-sizing: inherit
 
         &.focused
             .border
-                border-color: var(--mui-focused-border-color__)
+                border-color: var(--color-border-focused)
 
         &.filled
             .input-wrapper .inner-input-wrapper .input-compactor
@@ -568,10 +540,10 @@
             margin-bottom: 1.3em
 
         &.disabled
-            background: var(--mui-disabled-background__)
+            background: var(--color-background-disabled)
 
             .border
-                border-color: var(--mui-disabled-border-color__)
+                border-color: var(--color-border-disabled)
 
         &.input-type-password:not(.obfuscated)
             .side-wrapper
@@ -581,17 +553,21 @@
 
         &.invalid
             .border
-                border-color: var(--mui-invalid-border-color__)
+                border-color: var(--color-error)
+
+            .tint-background
+                opacity: .2
+                background: var(--color-error)
 
             .box-wrapper
                 .side-wrapper
                     .side-icon
-                        color: var(--mui-invalid-color__)
+                        color: var(--color-error)
 
             .bottom-bar
                 .max-text,
                 .helper-text
-                    color: var(--mui-invalid-color__)
+                    color: var(--color-error)
 
 
 
@@ -609,6 +585,8 @@
                 display: flex
                 align-items: center
                 height: 100%
+                position: relative
+                z-index: 2
 
                 .side-icon
                     height: 2em
@@ -617,10 +595,10 @@
                     align-items: center
                     justify-content: center
                     flex: none
-                    font-family: var(--mui-icon-font__)
+                    font-family: var(--font-icon)
                     color: inherit
                     user-select: none
-                    color: var(--mui-color-light__)
+                    color: var(--color-text-soft)
 
                     > span
                         font-size: 1.25em
@@ -637,7 +615,7 @@
                     margin: 0
                     border-radius: .25em
                     background: transparent
-                    color: var(--mui-color-light__)
+                    color: var(--color-text-soft)
                     font-family: inherit
                     font-size: inherit
                     position: relative
@@ -645,12 +623,12 @@
                     cursor: pointer
 
                     &:hover
-                        background: var(--mui-background-secondary__)
-                        color: var(--mui-color__)
+                        background: #00000040
+                        color: var(--color-text)
 
                     &:focus
-                        background: var(--mui-background-secondary__)
-                        color: var(--mui-color__)
+                        background: #00000040
+                        color: var(--color-text)
                         outline: none
 
                     &:disabled
@@ -672,19 +650,19 @@
                         z-index: 1
                         transition: clip-path 160ms, border 100ms, background 100ms
                         transform: rotate(45deg) translateX(-50%)
-                        background: var(--mui-background__)
+                        background: var(--color-background-soft)
                         border-left: 2px solid currentColor
-                        border-right: 1px solid var(--mui-background__)
+                        border-right: 1px solid var(--color-background-soft)
                         clip-path: inset(0 0 100% 0)
 
             .progress-bar
                 height: 3px
-                background: var(--mui-background-secondary__)
+                background: #00000040
                 width: 100%
                 position: absolute
                 bottom: 0
                 left: 0
-                z-index: 1
+                z-index: 2
                 pointer-events: none
                 transform: scaleY(0)
                 transform-origin: center bottom
@@ -701,11 +679,11 @@
 
                     &.score-0
                         width: 5%
-                        background: var(--mui-invalid-color__)
+                        background: var(--color-error)
 
                     &.score-1
                         width: 25%
-                        background: var(--mui-invalid-color__)
+                        background: var(--color-error)
 
                     &.score-2
                         width: 50%
@@ -726,20 +704,21 @@
             height: 100%
             width: 100%
             position: relative
+            z-index: 2
 
             .inner-input-wrapper
                 flex: 1
                 display: flex
                 align-items: center
                 height: 100%
-                gap: var(--mui-affix-gap__)
+                gap: var(--gap-affix)
 
                 .prefix,
                 .suffix
                     user-select: none
                     pointer-events: none
                     transition: opacity 160ms
-                    color: var(--mui-color-light__)
+                    color: var(--color-text-soft)
 
                 .input-compactor
                     flex: 1
@@ -757,7 +736,7 @@
                         font-family: inherit
                         font-size: inherit
                         resize: none
-                        color: var(--mui-color__)
+                        color: var(--color-text)
 
                         // Disable number arrows
                         &[type="number"]
@@ -800,7 +779,7 @@
                         text-align: left
                         pointer-events: none
                         transition: opacity 160ms
-                        color: var(--mui-color-light__)
+                        color: var(--color-text-soft)
                         transform-origin: top left
                         user-select: none
                         opacity: .8
@@ -825,22 +804,29 @@
                 text-align: left
                 pointer-events: none
                 transition: all 200ms
-                color: var(--mui-color-light__)
+                color: var(--color-text-soft)
                 transform-origin: top left
                 user-select: none
 
-        .border
+        .border,
+        .tint-background
             height: 100%
             width: 100%
             position: absolute
             top: 0
             left: 0
-            z-index: 2
+            z-index: 3
             border-radius: inherit
             border-width: 1px
             border-style: solid
-            border-color: var(--mui-border-color__)
+            border-color: var(--color-border)
             pointer-events: none
+
+        .tint-background
+            z-index: 1
+            border: none !important
+            background: transparent
+            opacity: 0
 
         .bottom-bar
             height: 1.3em
@@ -857,7 +843,7 @@
 
             .helper-text
                 font-size: .75em
-                color: var(--mui-color__)
+                color: var(--color-text-soft)
                 line-height: 1.5
                 flex: 1
                 white-space: nowrap
@@ -866,7 +852,7 @@
 
             .max-text
                 font-size: .75em
-                color: var(--mui-color__)
+                color: var(--color-text-soft)
                 line-height: 1.5
                 white-space: nowrap
                 overflow: hidden

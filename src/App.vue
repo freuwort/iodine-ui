@@ -105,16 +105,27 @@
             display: flex
             align-content: center
             width: 100%
-            background-color: rgb(var(--color-background), 70%)
             backdrop-filter: blur(10px) saturate(0%)
-            border-bottom: 2px solid rgb(var(--color-primary))
+            border-bottom: 2px solid var(--color-primary)
+            position: relative
 
+            &::after
+                content: ''
+                position: absolute
+                bottom: 0
+                left: 0
+                width: 100%
+                height: 100%
+                background: var(--color-background)
+                opacity: 0.7
         
         .main.limiter
             height: var(--height-header)
             display: flex
             align-items: center
             gap: 2rem
+            position: relative
+            z-index: 1
 
             .logo
                 height: 2.5rem
@@ -124,19 +135,19 @@
                 gap: 1rem
                 padding: .5rem 1rem
                 align-items: center
-                color: rgb(var(--color-heading))
+                color: var(--color-text)
                 text-decoration: none
                 font-size: .9rem
                 font-family: var(--font-heading)
                 transition: color 50ms ease-in-out
 
                 &:hover
-                    color: rgb(var(--color-primary))
+                    color: var(--color-primary)
 
             .divider
                 width: 1px
                 height: 2rem
-                background-color: rgb(var(--color-background-soft))
+                background-color: var(--color-background-soft)
 
             .theme-toggle
                 display: flex
@@ -149,13 +160,14 @@
                 border: none
                 cursor: pointer
                 transition: all 50ms ease-in-out
-                color: rgb(var(--color-heading))
-                background: rgb(var(--color-background-soft))
+                color: var(--color-text)
+                background: var(--color-background-soft)
 
                 &:hover,
                 &:focus
                     outline: none
-                    background: rgb(var(--color-primary))
+                    background: var(--color-primary)
+                    color: var(--color-on-primary)
 
                 .icon
                     font-family: var(--font-icon)
@@ -164,9 +176,9 @@
 
         .mega-menu
             width: 100%
-            background-color: rgb(var(--color-background), 70%)
+            background-color: #00000090
             backdrop-filter: blur(10px) saturate(0%)
-            border-bottom: 2px solid rgb(var(--color-primary))
+            border-bottom: 2px solid var(--color-primary)
 
             > .limiter
                 display: grid
@@ -180,15 +192,15 @@
                 flex: 1
                 display: flex
                 flex-direction: column
-                color: rgb(var(--color-heading))
+                color: var(--color-text)
                 text-decoration: none
                 border-radius: var(--radius-l)
 
                 &:hover
-                    background: rgb(var(--color-primary))
+                    background: var(--color-primary)
 
                     .image
-                        border-color: rgb(var(--color-primary))
+                        border-color: var(--color-primary)
 
                 .text
                     width: 100%
@@ -198,17 +210,17 @@
                 .image
                     width: 100%
                     aspect-ratio: 1.586
-                    background: rgb(var(--color-background))
+                    background: var(--color-background)
                     border-radius: inherit
-                    border: 2px solid rgb(var(--color-background-soft))
+                    border: 2px solid var(--color-background-soft)
 
     main
         padding-block: var(--height-header)
         
     footer
         width: 100%
-        background-color: rgb(var(--color-background))
-        border-top: 2px solid rgb(var(--color-background-soft))
+        background-color: var(--color-background)
+        border-top: 2px solid var(--color-background-soft)
 
         .links-row
             height: 12rem
@@ -218,5 +230,5 @@
             display: flex
             align-items: center
             font-size: 0.8rem
-            background: rgb(var(--color-background-soft))
+            background: var(--color-background-soft)
 </style>

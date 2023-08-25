@@ -1,5 +1,5 @@
 <template>
-    <div class="pi-colorpicker pi-container">
+    <div class="iod-container iod-colorpicker">
         <div class="sb-container">
             <div class="colorpanel" :style="`background: ${hueColorString};`"></div>
             <div class="handle" :style="`left: ${color.saturation * 100}%; top: ${(1 - color.brightness) * 100}%; background: ${fullColorString};`"></div>
@@ -93,41 +93,36 @@
 
 
     const props = defineProps<{
-        swatchPalettes: SwatchPalette[] | undefined;
+        swatchPalettes: SwatchPalette[]|undefined;
     }>()
 
 
 
-    const color = ref({
-        hue: 0,
-        saturation: 1,
-        brightness: 1,
-        alpha: 1,
-    } as HSBColor)
-    const outputMode = ref('hex' as 'hex' | 'rgb' | 'hsl' | 'hsb')
-    const swatchPalette = ref(null as string | null)
+    const color = ref({ hue: 0, saturation: 1, brightness: 1, alpha: 1} as HSBColor)
+    const outputMode = ref('hex' as 'hex'|'rgb'|'hsl'|'hsb')
+    const swatchPalette = ref(null as string|null)
 
 
 
-    const hueColorString = computed<string>(() => {
+    const hueColorString = computed((): string => {
         return `hsl(${color.value.hue * 360}, 100%, 50%)`
     })
 
-    const alphaColorGradientString = computed<string>(() => {
+    const alphaColorGradientString = computed((): string => {
         let hslColor = hsb2hsl(color.value)
         return `linear-gradient(to right, hsl(${hslColor.hue * 360}deg, ${hslColor.saturation * 100}%, ${hslColor.lightness * 100}%, 0), hsl(${hslColor.hue * 360}deg, ${hslColor.saturation * 100}%, ${hslColor.lightness * 100}%, 1))`
     })
 
-    const fullColorString = computed<string>(() => {
+    const fullColorString = computed((): string => {
         let hslColor = hsb2hsl(color.value)
         return `hsl(${hslColor.hue * 360}deg ${hslColor.saturation * 100}% ${hslColor.lightness * 100}%)`
     })
 
-    const fullHexColorString = computed<string>(() => {
+    const fullHexColorString = computed((): string => {
         return rgb2hex(hsb2rgb(color.value)).hex
     })
 
-    const selectedSwatchPalette = computed<SwatchPalette>(() => {
+    const selectedSwatchPalette = computed((): SwatchPalette => {
         return props.swatchPalettes?.find(e => e.id === swatchPalette.value) ?? { id: '', name: '', colors: [] }
     })
 
@@ -240,14 +235,18 @@
 </script>
 
 <style lang="sass" scoped>
-    .pi-container.pi-colorpicker
-        background: rgb(var(--color-background))
+    .iod-container.iod-colorpicker
+        background: var(--color-background)
         border-radius: var(--radius-m)
         padding: .5rem 0
-        border: 1px solid rgb(var(--color-border))
+        border: 1px solid var(--color-border)
         width: 320px
         display: flex
         flex-direction: column
+        box-sizing: border-box
+
+        *
+            box-sizing: inherit
 
         .handle
             height: 14px
@@ -263,8 +262,8 @@
             display: flex
             aspect-ratio: 1
             position: relative
-            border-top: 1px solid rgb(var(--color-border))
-            border-bottom: 1px solid rgb(var(--color-border))
+            border-top: 1px solid var(--color-border)
+            border-bottom: 1px solid var(--color-border)
 
             .handle
                 transform: translate(-50%, -50%)
@@ -363,7 +362,7 @@
             align-items: center
             padding: 1rem
             gap: 1rem
-            border-bottom: 1px solid rgb(var(--color-border))
+            border-bottom: 1px solid var(--color-border)
 
             .eyedropper-toggle
                 grid-area: eyedropper
@@ -375,8 +374,8 @@
                 font-family: var(--font-icon)
                 font-size: 1.4rem
                 line-height: 1
-                color: rgb(var(--color-text))
-                background: rgb(var(--color-background))
+                color: var(--color-text-soft)
+                background: var(--color-background)
                 border-radius: var(--radius-s)
                 padding: 0
                 border: none
@@ -384,15 +383,15 @@
                 user-select: none
 
                 &:hover
-                    background: rgb(var(--color-background-soft))
-                    color: rgb(var(--color-heading))
+                    background: var(--color-background-soft)
+                    color: var(--color-text)
 
         .output-layout
             display: flex
             align-items: center
             padding: 1rem
             gap: 1rem
-            border-bottom: 1px solid rgb(var(--color-border))
+            border-bottom: 1px solid var(--color-border)
 
             .sub-layout
                 flex: 1
@@ -416,8 +415,8 @@
 
             select, input
                 border: none
-                background: rgb(var(--color-background-soft))
-                color: rgb(var(--color-text))
+                background: var(--color-background-soft)
+                color: var(--color-text-soft)
                 font-family: var(--font-text)
                 padding: 0 .5rem
                 min-width: 0
@@ -430,7 +429,7 @@
                 width: 4rem
 
         .swatch-layout
-            border-bottom: 1px solid rgb(var(--color-border))
+            border-bottom: 1px solid var(--color-border)
             display: flex
             flex-direction: column
             gap: 1rem
@@ -438,8 +437,8 @@
 
             select, input
                 border: none
-                background: rgb(var(--color-background-soft))
-                color: rgb(var(--color-text))
+                background: var(--color-background-soft)
+                color: var(--color-text-soft)
                 font-family: var(--font-text)
                 padding: 0 .5rem
                 min-width: 0
@@ -457,13 +456,13 @@
                 width: 100%
                 aspect-ratio: 1
                 border-radius: var(--radius-s)
-                border: 1px solid rgb(var(--color-border))
+                border: 1px solid var(--color-border)
                 cursor: pointer
                 user-select: none
 
                 &.selected
-                    border-color: rgb(var(--color-primary))
+                    border-color: var(--color-primary)
 
                 &:hover
-                    border-color: rgb(var(--color-primary))
+                    border-color: var(--color-primary)
 </style>

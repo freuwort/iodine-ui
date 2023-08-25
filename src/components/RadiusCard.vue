@@ -28,7 +28,7 @@
         align-items: center
         justify-content: flex-start
         padding: .75rem 1rem
-        background: rgb(var(--color-background-soft))
-        color: rgb(var(--color-heading))
+        background: var(--color-background-soft)
+        color: var(--color-text)
         border: none
 </style>

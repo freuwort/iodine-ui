@@ -28,12 +28,12 @@
         text-align: left
         line-height: 1.5
         display: flex
-        height: 3rem
-        align-items: center
+        height: 8rem
+        align-items: flex-end
         justify-content: flex-start
         padding: .75rem 1rem
         border-radius: var(--radius-m)
         background: var(--color-primary)
         color: var(--color-on-primary)
-        border: 1px solid rgb(var(--color-background-soft))
+        border: 1px solid var(--color-background-soft)
 </style>

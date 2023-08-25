@@ -19,10 +19,10 @@
     section.hero
         height: 500px
         width: 100%
-        background-color: rgb(var(--color-background-soft))
+        background-color: var(--color-background-soft)
         background-image: url('/public/images/background.png')
         background-blend-mode: overlay
-        border-bottom: 2px solid rgb(var(--color-primary))
+        border-bottom: 2px solid var(--color-primary)
 
         .limiter
             height: 100%
@@ -34,7 +34,7 @@
             h1
                 font-size: 3rem
                 font-family: var(--font-heading)
-                color: rgb(var(--color-heading))
+                color: var(--color-text)
                 margin: 0
                 padding: 0
                 line-height: 1.2

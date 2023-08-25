@@ -1,10 +1,11 @@
 <template>
-    <component class="mui-button mui-container" :is="is"
-        :role="role__"
+    <component class="iod-container iod-button"
+        :is="is"
+        :role="role"
         :disabled="disabled || loading"
         :area-disabled="disabled || loading"
         :aria-label="label"
-        :class="classes__">
+        :class="classes">
 
         <div class="icon" v-if="iconLeft">{{iconLeft}}</div>
         <span class="content">
@@ -12,7 +13,7 @@
         </span>
         <div class="icon" v-if="iconRight">{{iconRight}}</div>
 
-        <IodineLoader type="spinner" class="spinner" color="var(--color-disabled)" />
+        <IodineLoader type="spinner" class="spinner"/>
 
         <div class="border" v-if="border"></div>
         <div class="background"></div>
@@ -32,45 +33,35 @@
             type: String,
             default: 'button'
         },
-
         variant: {
             type: String,
             default: 'filled',
         },
-
-        color: {
+        colorPreset: {
             type: String,
-            default: 'primary',
         },
-
         label: {
             type: String,
             default: '',
         },
-
         iconLeft: {
             type: String,
         },
-
         iconRight: {
             type: String,
         },
-
         size: {
             type: String,
             default: 'normal',
         },
-
         border: {
             type: Boolean,
             default: false,
         },
-
         loading: {
             type: Boolean,
             default: false,
         },
-
         disabled: {
             type: Boolean,
             default: false,
@@ -79,68 +70,54 @@
 
 
 
-    const role__ = computed(() => {
+    const role = computed((): string => {
         return ['a', 'Link'].includes(props.is) ? 'link' : 'button'
     })
 
-    const variant__ = computed(() => {
-        return ['filled', 'contained', 'text'].includes(props.variant) ? props.variant : 'filled'
-    })
-
-    const classes__ = computed(() => {
+    const classes = computed((): object => {
         return [
-            `button-size-${size__.value}`,
-            `button-variant-${variant__.value}`,
-            `button-color-${presetColor__.value}`,
+            `button-size-${props.size}`,
+            `button-variant-${props.variant}`,
+            `button-color-preset-${props.colorPreset}`,
             {
                 'disabled': props.disabled,
                 'loading': props.loading,
             }
         ]
     })
-
-    const size__ = computed(() => {
-        return ['small', 'normal', 'large'].includes(props.size) ? props.size : 'normal'
-    })
-
-    const presetColor__ = computed(() => {
-        return ['primary', 'secondary', 'success', 'info', 'warning', 'error'].includes(props.color) ? props.color : 'primary'
-    })
 </script>
 
 <style lang="sass" scoped>
-    *
-        box-sizing: border-box
-
-    .mui-button.mui-container
+    .iod-container.iod-button
         font-size: 1rem
 
-        --background: rgb(var(--color-primary))
-        --color: rgb(var(--color-on-primary))
-
-        --background-disabled: rgb(var(--color-background-disabled))
-        --color-disabled: rgb(var(--color-text-disabled))
-
-        --mui-icon-font__: var(--mui-icon-font, 'Material Icons')
+        --local-color-background: var(--color-primary)
+        --local-color-text: var(--color-on-primary)
 
         display: inline-flex
         align-items: center
         justify-content: center
         gap: .8em
+        padding: 0 1em
+        height: 2.5em
         text-align: center
         text-decoration: none
         text-transform: uppercase
         letter-spacing: .05em
         font-family: inherit
         font-weight: 500
-        border-radius: .325em
+        border-radius: var(--radius-m)
         border: none
         cursor: pointer
         user-select: none
         vertical-align: top
         position: relative
         background: transparent
-        color: var(--color)
+        color: var(--local-color-text)
+        box-sizing: border-box
+
+        *
+            box-sizing: inherit
 
         &:hover
             .overlay
@@ -154,29 +131,21 @@
 
 
 
-        &.button-color-primary
-            --background: var(--primary, #650db4)
-            --color: var(--primary-contrast, #fff)
+        &.button-color-preset-success
+            --local-color-background: var(--color-success)
+            --local-color-text: var(--color-text)
 
-        &.button-color-secondary
-            --background: var(--secondary, #22a6b3)
-            --color: var(--secondary-contrast, #fff)
+        &.button-color-preset-info
+            --local-color-background: var(--color-info)
+            --local-color-text: var(--color-text)
 
-        &.button-color-success
-            --background: var(--success, #4caf50)
-            --color: var(--success-contrast, #fff)
+        &.button-color-preset-warning
+            --local-color-background: var(--color-warning)
+            --local-color-text: var(--color-text)
 
-        &.button-color-info
-            --background: var(--info, #2196f3)
-            --color: var(--info-contrast, #fff)
-
-        &.button-color-warning
-            --background: var(--warning, #ff9800)
-            --color: var(--warning-contrast, #fff)
-
-        &.button-color-error
-            --background: var(--error, #f44336)
-            --color: var(--error-contrast, #fff)
+        &.button-color-preset-error
+            --local-color-background: var(--color-error)
+            --local-color-text: var(--color-text)
 
 
 
@@ -185,16 +154,16 @@
                 opacity: 1
 
         &.button-variant-contained
-            --color: var(--background)
+            --local-color-text: var(--local-color-background)
 
             .background
-                opacity: .15
+                opacity: .15 !important
 
         &.button-variant-text
-            --color: var(--background)
+            --local-color-text: var(--local-color-background)
 
             .background
-                opacity: 0
+                opacity: 0 !important
 
 
 
@@ -218,12 +187,15 @@
         &.disabled,
         &.loading,
         &:disabled
-            --background: var(--background-disabled)
-            --color: var(--color-disabled)
+            --local-color-background: var(--color-background-disabled)
+            --local-color-text: var(--color-text-soft-disabled)
             cursor: initial
 
             .overlay
                 display: none
+
+            .border
+                border-color: var(--color-border-disabled)
 
 
 
@@ -250,10 +222,11 @@
             pointer-events: none
 
             &.overlay
-                background: currentcolor
+                background: currentColor
 
             &.background
-                background: var(--background)
+                background: var(--local-color-background)
+                opacity: 1
 
         .content
             font-size: .75rem
@@ -270,7 +243,7 @@
             pointer-events: none
             vertical-align: top
             text-transform: lowercase
-            font-family: var(--mui-icon-font__)
+            font-family: var(--font-icon)
             position: relative
             z-index: 1
 
@@ -292,6 +265,6 @@
             left: 0
             z-index: 2
             border-radius: inherit
-            border: 1px solid var(--color)
+            border: 1px solid var(--local-color-text)
             pointer-events: none
 </style>
