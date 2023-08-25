@@ -1,29 +1,21 @@
-# iodine-ui
+# Iodine UI (WIP) 🎚️
+Iodine UI is a Material Design inspired UI library for Vue 3 with a focus on interactive components
 
-## Project setup
-```
+## Project setup (standard) ⚙️
+```bash
+# Install
 npm install
-```
-
-### Compiles and hot-reloads for development
-```
+# Serve
 npm run serve
-```
-
-### Compiles and minifies for production
-```
+# Or build
 npm run build
 ```
 
-### Run your unit tests
-```
-npm run test:unit
-```
+## Installation ⚙️
+coming soon
 
-### Lints and fixes files
-```
-npm run lint
-```
+## Demo 🖥️
+coming soon
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+## License 📜
+[MIT](http://opensource.org/licenses/MIT) – 2023
