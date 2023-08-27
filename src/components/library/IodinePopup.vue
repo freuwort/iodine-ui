@@ -1,7 +1,12 @@
 <template>
     <Teleport to="body">
         <FocusTrap :active="isOpen" @deactivate="close(true)">
-            <div class="iod-container iod-popup popup-outer-wrapper" :class="{'open': isOpen}" @click.self.exact="closeOnBackdropClick()">
+            <div
+                class="iod-container iod-popup popup-outer-wrapper"
+                :class="{'open': isOpen}"
+                :style="{'--local-blur': blur, '--local-max-width': maxWidth, '--local-color-backdrop': backdropColor, '--local-color-modal': modalColor}"
+                @click.self.exact="closeOnBackdropClick()"
+            >
                 <div class="popup-inner-wrapper">
                     <div class="popup-content">
                         <slot></slot>
@@ -43,6 +48,22 @@
         noHeader: {
             type: Boolean,
             default: false,
+        },
+        blur: {
+            type: String,
+            default: '20px',
+        },
+        maxWidth: {
+            type: String,
+            default: '700px',
+        },
+        backdropColor: {
+            type: String,
+            default: 'rgb(61 65 69 / 80%)',
+        },
+        modalColor: {
+            type: String,
+            default: 'var(--color-background)',
         },
     })
 

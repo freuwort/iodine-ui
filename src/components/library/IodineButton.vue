@@ -54,6 +54,10 @@
             type: String,
             default: 'normal',
         },
+        shape: {
+            type: String,
+            default: 'radius-m',
+        },
         border: {
             type: Boolean,
             default: false,
@@ -77,6 +81,7 @@
     const classes = computed((): object => {
         return [
             `button-size-${props.size}`,
+            `button-shape-${props.shape}`,
             `button-variant-${props.variant}`,
             `button-color-preset-${props.colorPreset}`,
             {
@@ -133,19 +138,19 @@
 
         &.button-color-preset-success
             --local-color-background: var(--color-success)
-            --local-color-text: var(--color-text)
+            --local-color-text: var(--color-on-success)
 
         &.button-color-preset-info
             --local-color-background: var(--color-info)
-            --local-color-text: var(--color-text)
+            --local-color-text: var(--color-on-info)
 
         &.button-color-preset-warning
             --local-color-background: var(--color-warning)
-            --local-color-text: var(--color-text)
+            --local-color-text: var(--color-on-warning)
 
         &.button-color-preset-error
             --local-color-background: var(--color-error)
-            --local-color-text: var(--color-text)
+            --local-color-text: var(--color-on-error)
 
 
 
@@ -181,6 +186,26 @@
             height: 3em
             padding: 0 1.75em
             gap: 1.55em
+
+
+
+        &.button-shape-rect
+            border-radius: 0px
+
+        &.button-shape-radius-s
+            border-radius: var(--radius-s)
+
+        &.button-shape-radius-m
+            border-radius: var(--radius-m)
+
+        &.button-shape-radius-l
+            border-radius: var(--radius-l)
+
+        &.button-shape-radius-xl
+            border-radius: var(--radius-xl)
+
+        &.button-shape-pill
+            border-radius: 1000px
 
 
 

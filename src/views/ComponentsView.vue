@@ -5,6 +5,22 @@
         <div class="limiter">
             <div class="flex vertical gap-4">
                 <div class="group">
+                    <h2>Icons</h2>
+                    <div class="flex gap-1 v-center">
+                        <IodineIcon icon="home"/>
+                        <IodineIcon icon="info"/>
+                        <IodineIcon icon="check_circle"/>
+                        <IodineIcon icon="warning"/>
+                        <IodineIcon icon="error"/>
+                        <IodineIcon icon="dashboard"/>
+                    </div>
+                    <hr>
+                    <div class="flex gap-1 v-center">
+                        <IodineIcon icon="/images/iodine_logo.svg" image-icon/>
+                    </div>
+                </div>
+
+                <div class="group">
                     <h2>Button Variations</h2>
                     <div class="flex gap-1 v-center">
                         <IodineButton class="flex-1" label="Label" />
@@ -40,7 +56,7 @@
                         <IodineButton class="flex-1" variant="text" label="Label" border loading />
                     </div>
 
-                    <h2>Button Colors</h2>
+                    <h2>Button Colors & Sizes</h2>
                     <div class="flex gap-1 v-center">
                         <IodineButton class="flex-1" label="Primary"/>
                         <IodineButton class="flex-1" label="Info" color-preset="info"/>
@@ -73,6 +89,104 @@
                         <IodineButton class="flex-1" label="Warning" size="large" color-preset="warning"/>
                         <IodineButton class="flex-1" label="Error" size="large" color-preset="error"/>
                         <IodineButton class="flex-1" label="Custom" size="large" style="--local-color-background: #130f40; --local-color-text: #f9ca24;"/>
+                    </div>
+
+                    <h2>Button Shapes</h2>
+                    <div class="flex gap-1 v-center">
+                        <IodineButton class="flex-1" label="Label" shape="rect"/>
+                        <IodineButton class="flex-1" label="Label" shape="radius-s"/>
+                        <IodineButton class="flex-1" label="Label" shape="radius-m"/>
+                        <IodineButton class="flex-1" label="Label" shape="radius-l"/>
+                        <IodineButton class="flex-1" label="Label" shape="radius-xl"/>
+                        <IodineButton class="flex-1" label="Label" shape="pill"/>
+                    </div>
+                </div>
+
+                <div class="flex gap-3">
+                    <div class="group flex-1">
+                        <h2>Icon Button Variations</h2>
+                        <div class="flex gap-1 v-center">
+                            <IodineIconButton icon="token" />
+                            <IodineIconButton icon="token" border />
+                            <IodineIconButton icon="token" disabled />
+                            <IodineIconButton icon="token" border disabled />
+                            <IodineIconButton icon="token" loading />
+                            <IodineIconButton icon="token" border loading />
+                        </div>
+                        <hr>
+                        <div class="flex gap-1 v-center">
+                            <IodineIconButton variant="filled" icon="token" />
+                            <IodineIconButton variant="filled" icon="token" border />
+                            <IodineIconButton variant="filled" icon="token" disabled />
+                            <IodineIconButton variant="filled" icon="token" border disabled />
+                            <IodineIconButton variant="filled" icon="token" loading />
+                            <IodineIconButton variant="filled" icon="token" border loading />
+                        </div>
+                        <div class="flex gap-1 v-center">
+                            <IodineIconButton variant="contained" icon="token" />
+                            <IodineIconButton variant="contained" icon="token" border />
+                            <IodineIconButton variant="contained" icon="token" disabled />
+                            <IodineIconButton variant="contained" icon="token" border disabled />
+                            <IodineIconButton variant="contained" icon="token" loading />
+                            <IodineIconButton variant="contained" icon="token" border loading />
+                        </div>
+                        <div class="flex gap-1 v-center">
+                            <IodineIconButton variant="text" icon="token" />
+                            <IodineIconButton variant="text" icon="token" border />
+                            <IodineIconButton variant="text" icon="token" disabled />
+                            <IodineIconButton variant="text" icon="token" border disabled />
+                            <IodineIconButton variant="text" icon="token" loading />
+                            <IodineIconButton variant="text" icon="token" border loading />
+                        </div>
+                    </div>
+    
+                    <div class="group flex-1">
+                        <h2>Icon Button Colors & Sizes</h2>
+                        <div class="flex gap-1 v-center">
+                            <IodineIconButton icon="token"/>
+                            <IodineIconButton icon="info" color-preset="info"/>
+                            <IodineIconButton icon="check_circle" color-preset="success"/>
+                            <IodineIconButton icon="warning" color-preset="warning"/>
+                            <IodineIconButton icon="error" color-preset="error"/>
+                            <IodineIconButton icon="dashboard" style="--local-color-background: #130f40; --local-color-text: #f9ca24;"/>
+                        </div>
+                        <hr>
+                        <div class="flex gap-1 v-center">
+                            <IodineIconButton icon="token" size="small"/>
+                            <IodineIconButton icon="info" size="small" color-preset="info"/>
+                            <IodineIconButton icon="check_circle" size="small" color-preset="success"/>
+                            <IodineIconButton icon="warning" size="small" color-preset="warning"/>
+                            <IodineIconButton icon="error" size="small" color-preset="error"/>
+                            <IodineIconButton icon="dashboard" size="small" style="--local-color-background: #130f40; --local-color-text: #f9ca24;"/>
+                        </div>
+                        <div class="flex gap-1 v-center">
+                            <IodineIconButton icon="token" size="normal"/>
+                            <IodineIconButton icon="info" size="normal" color-preset="info"/>
+                            <IodineIconButton icon="check_circle" size="normal" color-preset="success"/>
+                            <IodineIconButton icon="warning" size="normal" color-preset="warning"/>
+                            <IodineIconButton icon="error" size="normal" color-preset="error"/>
+                            <IodineIconButton icon="dashboard" size="normal" style="--local-color-background: #130f40; --local-color-text: #f9ca24;"/>
+                        </div>
+                        <div class="flex gap-1 v-center">
+                            <IodineIconButton icon="token" size="large"/>
+                            <IodineIconButton icon="info" size="large" color-preset="info"/>
+                            <IodineIconButton icon="check_circle" size="large" color-preset="success"/>
+                            <IodineIconButton icon="warning" size="large" color-preset="warning"/>
+                            <IodineIconButton icon="error" size="large" color-preset="error"/>
+                            <IodineIconButton icon="dashboard" size="large" style="--local-color-background: #130f40; --local-color-text: #f9ca24;"/>
+                        </div>
+                    </div>
+
+                    <div class="group flex-1">
+                        <h2>Icon Button Shapes</h2>
+                        <div class="flex gap-1 v-center">
+                            <IodineIconButton icon="token" shape="rect"/>
+                            <IodineIconButton icon="token" shape="radius-s"/>
+                            <IodineIconButton icon="token" shape="radius-m"/>
+                            <IodineIconButton icon="token" shape="radius-l"/>
+                            <IodineIconButton icon="token" shape="radius-xl"/>
+                            <IodineIconButton icon="token" shape="pill"/>
+                        </div>
                     </div>
                 </div>
     
@@ -150,7 +264,9 @@
 <script setup lang="ts">
     import { ref } from 'vue'
     
+    import IodineIcon from '@/components/library/IodineIcon.vue'
     import IodineButton from '@/components/library/IodineButton.vue'
+    import IodineIconButton from '@/components/library/IodineIconButton.vue'
     import IodineInput from '@/components/library/IodineInput.vue'
     import IodineToggle from '@/components/library/IodineToggle.vue'
     import IodineLoader from '@/components/library/IodineLoader.vue'
