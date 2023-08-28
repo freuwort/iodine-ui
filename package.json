@@ -18,7 +18,7 @@
   "private": false,
   "scripts": {
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build --base /iodine-ui/ --dest dist_docs",
+    "build": "vue-cli-service build --dest dist_docs",
     "package": "vue-cli-service build --target lib --name iodine-ui ./src/components/library/index.ts --dest dist --formats umd,umd-min,commonjs",
     "test:unit": "vue-cli-service test:unit",
     "lint": "vue-cli-service lint"
