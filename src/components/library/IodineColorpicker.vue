@@ -402,6 +402,8 @@
                 input
                     width: 0
                     flex: 1
+                    &[type="number"]
+                        -moz-appearance: textfield
 
                 .alpha
                     width: 3rem
