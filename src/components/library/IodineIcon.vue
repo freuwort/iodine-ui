@@ -35,6 +35,11 @@
         font-family: var(--font-icon)
         line-height: 1
         object-fit: contain
+        user-select: none
+        box-sizing: border-box
+
+        *
+            box-sizing: inherit
 
         img
             height: inherit
