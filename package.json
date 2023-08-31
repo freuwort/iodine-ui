@@ -3,15 +3,14 @@
   "description": "A Vue.js 3 UI Library",
   "author": "Freuwort",
   "license": "MIT",
-  "version": "0.1.0",
+  "version": "1.0.0-alpha.0",
   "exports": {
     ".": {
       "require": "./dist/iodine-ui.common.js",
-      "default": "./dist/iodine-ui.umd.js"
-    },
-    "./styles.css": "./dist/iodine-ui.css"
+      "default": "./dist/iodine-ui.umd.min.js"
+    }
   },
-  "main": "dist/iodine-ui.umd.js",
+  "main": "dist/iodine-ui.umd.min.js",
   "files": [
     "dist"
   ],
@@ -19,14 +18,14 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build --dest dist_docs",
-    "package": "vue-cli-service build --target lib --name iodine-ui ./src/components/library/index.ts --dest dist --formats umd,umd-min,commonjs",
+    "package": "vue-cli-service build --target lib --name iodine-ui ./src/components/library/index.ts --dest dist --formats umd-min,commonjs",
     "test:unit": "vue-cli-service test:unit",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
     "core-js": "^3.8.3",
     "focus-trap-vue": "^4.0.2",
-    "vue": "^3.2.13",
+    "vue": "^3.2.37",
     "vue-router": "^4.0.3"
   },
   "devDependencies": {
