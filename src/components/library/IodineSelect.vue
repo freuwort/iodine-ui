@@ -93,6 +93,13 @@ onMounted(() => {
   const el = instance?.vnode.el as HTMLElement;
   _DOMRect = useElementBounding(el, _DOMRect);
   value.value = props.modelValue;
+
+  //find the first option that matches the modelValue
+  const option = props.options.find((o) => o.value === props.modelValue);
+  if (option) {
+    change(option);
+  }
+
 });
 
 defineExpose({

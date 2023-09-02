@@ -49,7 +49,7 @@
         <div class="swatch-layout">
             <iodine-select v-model="swatchPalette" :options="
                 [
-                    { value: 'null', text: 'Select a palette' },
+                    { value: null, text: 'Select a palette' },
                 ].concat(props.swatchPalettes?.map(e => ({ value: e.id, text: e.name })) ?? [])
             "/>
             <div class="grid">
