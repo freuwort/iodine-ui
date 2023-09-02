@@ -66,7 +66,7 @@ const props = defineProps({
   /* Own Attributes */
   options: { type: Array as PropType<Option[]>, default : ()=>[]},
   modelValue: {
-    type: Object as PropType<SelectInputTypes>,
+    type: null as unknown as PropType<SelectInputTypes>,
     default: () => null as SelectInputTypes,
   },
 
@@ -99,15 +99,20 @@ defineExpose({
   value
 })
 
+const emits = defineEmits([
+  'update:modelValue',
+])
+
 const activate = () => {
   if(popoverComponent.value == null) return;
   popoverComponent.value!.toggle();
 };
 
 const change = (o: Option) => {
-  console.log(`DEBUG -- ${o}`);
-  value.value = o.value;
-  (selectComponent.value!.value as any) = o.value;
+  console.log(`DEBUG --`, o);
+  value.value = o.text;
+  selectComponent.value!.value = o.text;
+  emits('update:modelValue', o.value)
 }
 
 </script>
