@@ -256,6 +256,24 @@
                         </IodineColorpicker>
                     </div>
                 </div>
+                <div class="group">
+                    <h2>Lynn's Playground</h2>
+                    <div class="flex gap-1">
+                        <select style="width:100px">
+                            <option value="a">AAAAAaa aAAAa AAAAaaa AAAaaAA  AAaaaaaaA AAAaaa AAAaA AAAAAaa aAAAa AAAAaaa AAAaaAA  AAaaaaaaA AAAaaa AAAaA AAAAAaa aAAAa AAAAaaa AAAaaAA  AAaaaaaaA AAAaaa AAAaA AAAAAaa aAAAa AAAAaaa AAAaaAA  AAaaaaaaA AAAaaa AAAaA AAAAAaa aAAAa AAAAaaa AAAaaAA  AAaaaaaaA AAAaaa AAAaA AAAAAaa aAAAa AAAAaaa AAAaaAA  AAaaaaaaA AAAaaa AAAaA</option>
+                        </select>
+                        <iodine-select label="Choose an 'AAaA'" :options="
+                        [
+                            {
+                            text: 'AAAAAaa aAAAa AAAAaaa AAAaaAA  AAaaaaaaA AAAaaa AAAaA AAAAAaa aAAAa AAAAaaa AAAaaAA  AAaaaaaaA AAAaaa AAAaA AAAAAaa aAAAa AAAAaaa AAAaaAA  AAaaaaaaA AAAaaa AAAaA AAAAAaa aAAAa AAAAaaa AAAaaAA  AAaaaaaaA AAAaaa AAAaA AAAAAaa aAAAa AAAAaaa AAAaaAA  AAaaaaaaA AAAaaa AAAaA AAAAAaa aAAAa AAAAaaa AAAaaAA  AAaaaaaaA AAAaaa AAAaA',
+                            value: 'a'
+                        },{
+                            text: 'AAAAAaa aAAAa AAAAaaa AAAaaAA  AAaaaaaaA AAAaaa AAAaA AAAAAaa aAAAa AAAAaaa AAAaaAA  AAaaaaaaA AAAaaa AAAaA AAAAAaa aAAAa AAAAaaa AAAaaAA  AAaaaaaaA AAAaaa AAAaA AAAAAaa aAAAa AAAAaaa AAAaaAA  AAaaaaaaA AAAaaa AAAaA AAAAAaa aAAAa AAAAaaa AAAaaAA  AAaaaaaaA AAAaaa AAAaA AAAAAaa aAAAa AAAAaaa AAAaaAA  AAaaaaaaA AAAaaa AAAaA',
+                            value: 'a'
+                        }]">
+                        </iodine-select>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -273,6 +291,8 @@
     import IodinePopup from '@/components/library/IodinePopup.vue'
     import IodineColorpicker from '@/components/library/IodineColorpicker.vue'
     import IodineIconpicker from '@/components/library/IodineIconpicker.vue'
+
+    import IodineSelect from '@/components/library/IodineSelect.vue'
 
     import HeroSection from '@/components/HeroSection.vue'
     

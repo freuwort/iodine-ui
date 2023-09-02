@@ -140,7 +140,8 @@ const selectedSwatchPalette = computed((): SwatchPalette => {
 
 
 
-const hsb2hsl = (color: HSBColor): HSLColor => {
+function hsb2hsl(color: HSBColor): HSLColor
+{
     let { hue, saturation, brightness } = color
 
     let lightness = (2 - saturation) * brightness / 2
@@ -165,7 +166,8 @@ const hsb2hsl = (color: HSBColor): HSLColor => {
     }
 }
 
-const hsb2rgb = (color: HSBColor): RGBColor => {
+function hsb2rgb (color: HSBColor): RGBColor
+{
     let { hue, saturation, brightness } = color
 
     let r, g, b
@@ -227,7 +229,8 @@ const hsb2rgb = (color: HSBColor): RGBColor => {
     }
 }
 
-const rgb2hex = (color: RGBColor): HexColor => {
+function rgb2hex (color: RGBColor): HexColor
+{
     let { red, green, blue } = color
 
     let r = Math.round(red * 255).toString(16).padStart(2, '0')
@@ -238,6 +241,8 @@ const rgb2hex = (color: RGBColor): HexColor => {
         hex: `${r}${g}${b}`.toUpperCase()
     }
 }
+
+
 </script>
 
 <style lang="sass" scoped>

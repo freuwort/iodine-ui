@@ -1,5 +1,11 @@
 <template>
-    <label class="iod-container iod-input" :id="nativeId || (id ? 'label-for-'+id : undefined)" :class="classes">
+    <label
+        ref="containerElement"
+        class="iod-container iod-input"
+        :id="nativeId || (id ? 'label-for-'+id : undefined)"
+        :class="classes"
+        tabindex="-1"
+    >
         <div class="box-wrapper">
             <div class="border" v-if="border"></div>
             <div class="tint-background"></div>
@@ -42,8 +48,8 @@
                             :value="internalValue"
                             :aria-label="label"
                             @input="setInput($event.target.value); emitUpdate()"
-                            @focus="inputEvent('focus', $event)"
-                            @blur="inputEvent('blur', $event)"
+                            @focus.stop="inputEvent('focus', $event)"
+                            @blur.stop="inputEvent('blur', $event)"
                             @keydown="inputEvent('keydown', $event)"
                             @keyup="inputEvent('keyup', $event)"
                             @keypress="inputEvent('keypress', $event)"
@@ -236,6 +242,7 @@
     const isFocused = ref(false as boolean)
     const isObfuscated = ref(true as boolean)
 
+    const containerElement = ref({} as HTMLElement)
     const input = ref({} as HTMLInputElement)
     // END: Internal variables
 
@@ -401,7 +408,10 @@
         emits('clear')
     }
 
-    const inputEvent = (type: 'update:modelValue'|'update:valid'|'focus'|'blur'|'keydown'|'keyup'|'keypress'|'change'|'esc'|'enter'|'space'|'clear', event: Event|boolean): void => {
+    const inputEvent = (type: 'update:modelValue'|'update:valid'|'focus'|'blur'|'keydown'|'keyup'|'keypress'|'change'|'esc'|'enter'|'space'|'clear', event: Event): void => {
+        
+        if (shouldBounceEvent(event)) return
+        
         emits(type, event)
 
         switch (type)
@@ -409,6 +419,18 @@
             case 'focus': isFocused.value = true; break;
             case 'blur': isFocused.value = false; validateOnBlur(); break;
         }
+    }
+
+    function shouldBounceEvent (event: Event): boolean {
+        if(!(event instanceof FocusEvent)) return false
+
+        if (event.relatedTarget === containerElement.value && isFocused.value)
+        {
+            setFocus()
+            return true
+        }
+
+        return false
     }
     // END: Emits & events
 

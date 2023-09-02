@@ -1,6 +1,6 @@
 <template>
     <Teleport to="body">
-        <div class="popover" :style="[positionCSS,
+        <div class="popover" ref="popoverDiv" :style="[positionCSS,
          {
             display: showing ? '' : 'none'
          }
@@ -16,8 +16,8 @@
 </script>
 
 <script setup lang="ts">
-import { PropType, StyleValue, computed, getCurrentInstance, ref } from 'vue';
-import {refDOMBounds, getEmptyRefDOMBounds} from '../helpers/refDOMBounds';
+import { PropType, StyleValue, computed, getCurrentInstance, onMounted, ref } from 'vue';
+import {refDOMBounds, getEmptyRefDOMBounds, useElementBounding} from '../helpers/refDOMBounds';
 
 
 
@@ -36,17 +36,29 @@ const props = defineProps({
     visible: {
         type: Boolean,
         default: false
+    },
+    maySlideAroundToTheLeft: {
+        type: Boolean,
+        default: false
     }
 });
 
 const showing = ref(false);
+const popoverDiv = ref({} as HTMLInputElement)
+
+let ourBounds = getEmptyRefDOMBounds();
 
 const toggle = () => {
     showing.value = !showing.value;
 }
 
+onMounted(() => {
+    ourBounds = useElementBounding(popoverDiv.value, ourBounds);
+})
+
 defineExpose({
-    toggle
+    toggle,
+    showing
 })
 
 const positionCSS = computed(() => {
@@ -60,9 +72,16 @@ const positionCSS = computed(() => {
         bottom: props.parentRect.bottom.value - bodyRect.top,
     }
 
+    const scrollBarWidth = (window.innerWidth - document.documentElement.clientWidth);
+    const graceMargin = 10;
+
     const css : StyleValue = {
         left: `${offsetToBody.left}px`,
-        width: `${props.parentRect.width.value}px`,
+        maxWidth: `calc(100vw - ${scrollBarWidth + graceMargin*2}px)`
+    }
+
+    if(ourBounds.width.value + offsetToBody.left > bodyRect.width - scrollBarWidth) {
+        css.left = `${bodyRect.width - ourBounds.width.value - graceMargin}px`;
     }
 
     switch (props.placement) {
@@ -80,7 +99,6 @@ const positionCSS = computed(() => {
 
 <style lang="sass" scoped>
 .popover
-    background-color: var(--color-background-soft)
     z-index: 2147483647
     position: absolute
 </style>

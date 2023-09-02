@@ -1,27 +1,41 @@
 <template>
-  <component
-    :is="'input'"
-    ref="selectComponent"
-    class="iodine-select"
-    :autofocus="autofocus"
-    :disabled="disabled"
-    :form="form"
-    :multiple="multiple"
-    :name="name"
-    :required="required"
-    :size="size"
-    :readonly="true"
-    :value="value"
-    @focus="activate"
-    @blur="activate"
-  >
-  <pop-over :parent-rect="_DOMRect!" ref="popoverComponent">
-    <div v-for="(option, i) in props.options" :key="i">
-      <!-- Mousedown instead of click due to event ordering. Prevents hiding of elements to interfere with this event dispatch -->
-      <div @mousedown="change(option)">{{option.text}}</div>
-    </div>
-  </pop-over>
-  </component>
+  <div class="iod-container iod-select">
+    <IodineInput
+      ref="inputComponent"
+      :label="label"
+      :autofocus="autofocus"
+      :disabled="disabled"
+      :required="required"
+      :size="size"
+      :readonly="true"
+      v-model="selectedOptionText"
+      @mousedown="activate"
+      @blur="activate"
+    >
+      <template #right>
+        <DropdownArrowIcon class="dropdown-arrow" :class="{'open': popoverComponent?.showing}"/>
+      </template>
+    </IodineInput>
+
+    <!-- Form compatibility: used as form exposure for internalValue  -->
+    <input
+      type="hidden"
+      :name="name"
+      :form="form"
+      :value="internalValue"
+    />
+
+    <pop-over :parent-rect="_DOMRect!" ref="popoverComponent">
+      <div class="select-dropdown-wrapper" :style="{
+        minWidth: _DOMRect.width.value + 'px',
+      }">
+        <div class="select-dropdown-item" v-for="(option, i) in props.options" :key="i" @mousedown="change(option)">
+          <!-- Mousedown instead of click due to event ordering. Prevents hiding of elements to interfere with this event dispatch -->
+          <span>{{option.text}}</span>
+        </div>
+      </div>
+    </pop-over>
+  </div>
 </template>
 
 <script lang="ts">
@@ -30,9 +44,12 @@ export type SelectInputTypes = InputTypes_ | InputTypes_[];
 </script>
 
 <script setup lang="ts">
-import { onMounted, getCurrentInstance, Ref, PropType, ref } from "vue";
-import PopOver from "./partials/PopOver.vue";
+import { onMounted, getCurrentInstance, Ref, PropType, ref, watch, computed } from "vue";
 import {getEmptyRefDOMBounds, useElementBounding} from './helpers/refDOMBounds';
+
+import PopOver from "./partials/PopOver.vue";
+import IodineInput from "@/components/library/IodineInput.vue";
+import DropdownArrowIcon from "@/components/library/icons/DropdownArrowIcon.vue";
 
 /*
 Reference: https://www.w3schools.com/tags/tag_select.asp
@@ -70,6 +87,7 @@ const props = defineProps({
     type: null as unknown as PropType<SelectInputTypes>,
     default: () => null as SelectInputTypes,
   },
+  label: { type: String, default: "" },
 
   /* https://www.w3schools.com/tags/tag_select.asp */
   autofocus: { type: Boolean, default: false },
@@ -83,17 +101,16 @@ const props = defineProps({
 });
 
 let _DOMRect = getEmptyRefDOMBounds();
+const inputComponent = ref<typeof IodineInput | null>(null);
 const popoverComponent = ref<typeof PopOver | null>(null);
-const selectComponent = ref<HTMLInputElement | null>(null);
-const value = ref(null) as Ref<SelectInputTypes>;
+const internalValue = ref(null) as Ref<SelectInputTypes>;
 //Functions
 
 
 onMounted(() => {
   const instance = getCurrentInstance();
   const el = instance?.vnode.el as HTMLElement;
-  _DOMRect = useElementBounding(el, _DOMRect);
-  value.value = props.modelValue;
+  _DOMRect = useElementBounding(el.firstChild as HTMLElement, _DOMRect);
 
   //find the first option that matches the modelValue
   const option = props.options.find((o) => o.value === props.modelValue);
@@ -103,59 +120,120 @@ onMounted(() => {
 
 });
 
-defineExpose({
-  value
-})
+watch(() => props.modelValue, (value) => {
+  internalValue.value = value;
+}, {
+  deep: true,
+  immediate: true,
+});
+
+const selectedOptionText = computed({
+  get() {
+    //find the first option that matches the modelValue
+    const option = props.options.find((o) => o.value === internalValue.value);
+    if (option) {
+      return option.text;
+    }
+    return "";
+  },
+
+  set(value) {
+    internalValue.value = value;
+  },
+});
 
 const emits = defineEmits([
   'update:modelValue',
 ])
 
-const activate = () => {
-  if(popoverComponent.value == null) return;
-  popoverComponent.value!.toggle();
+const activate = (event: Event) => {
+  if (popoverComponent.value == null) return;
+
+  if (event?.type === 'mousedown')
+  {
+    popoverComponent.value!.toggle();
+    return;
+  }
+
+  if (event?.type === 'blur')
+  {
+    popoverComponent.value!.showing = false;
+    return;
+  }
 };
 
 const change = (o: Option) => {
-  console.log(`DEBUG --`, o);
-  value.value = o.text;
-  selectComponent.value!.value = o.text;
+  // console.log(`DEBUG --`, o);
+  internalValue.value = o.value;
   emits('update:modelValue', o.value)
 }
 
 </script>
 
 <style lang="sass" scoped>
-.iodine-select
-    border: none
-    background: var(--color-background-soft)
-    color: var(--color-text-soft)
-    font-family: var(--font-text)
-    padding: 0 .5rem
-    min-width: 0
-    margin: 0
-    border-radius: var(--radius-s)
-    height: 2rem
-    flex: none
-    &:focus, &:active
-      outline: none
-      border-color: var(--color-border-focused)
-      border-style: solid
-      box-shadow: 0 0 0 1px var(--color-border-focused)
+.iod-container.iod-select
+  display: contents
 
-.popover
-    border-color: var(--color-border-focused)
-    border-style: solid
+  .dropdown-arrow
+    transform: rotate(0deg)
+    transition: transform 100ms ease-in-out
+    pointer-events: none
 
-    div
-      padding-left: .2rem
+    &.open
+      transform: rotate(180deg)
 
-      &:hover
-        background-color: var(--color-background)
-        color: var(--color-text-soft)
+.select-dropdown-wrapper
+  display: flex
+  flex-direction: column
+  border: 1px solid var(--color-border)
+  border-radius: var(--radius-m)
+  background: var(--color-background-soft)
+  color: var(--color-text-soft)
+  padding-block: .5rem
+  user-select: none
+  max-height: 100vh
+  overflow-y: auto
+  font-size: .9em
+  box-shadow: var(--shadow-elevation-medium)
 
-      + div
-        border-color: var(--color-border-focused)
-        border-top-style: dashed
+  .select-dropdown-item
+    width: 100%
+    min-height: 2rem
+    padding-inline: 1rem
+    padding-block: .25rem
+    cursor: pointer
+    display: flex
+    align-items: center
+    justify-content: flex-start
+
+    &::before
+      content: ""
+      position: absolute
+      top: 0
+      left: 0
+      right: 0
+      bottom: 0
+      border-radius: inherit
+      background-color: currentColor
+      opacity: 0
+
+    &:hover
+      color: var(--color-text)
+
+      &::before
+        opacity: .1
+
+    > span
+      position: relative
+      z-index: 1
+      white-space: nowrap
+      overflow: auto
+      
+      // Dont display the scrollbar
+      scrollbar-width: none
+      -ms-overflow-style: none
+      
+      &::-webkit-scrollbar
+        display: none
 
 </style>
