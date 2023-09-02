@@ -10,6 +10,7 @@
     :name="name"
     :required="required"
     :size="size"
+    :readonly="true"
     :value="value"
     @focus="activate"
     @blur="activate"
