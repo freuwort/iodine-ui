@@ -2,8 +2,11 @@
     <div class="iod-container iod-colorpicker">
         <div class="sb-container">
             <div class="colorpanel" :style="`background: ${hueColorString};`"></div>
-            <div class="handle" :style="`left: ${color.saturation * 100}%; top: ${(1 - color.brightness) * 100}%; background: ${fullColorString};`"></div>
-            <area-slider class="bar" v-model:x="color.saturation" :y="1 - color.brightness" @update:y="color.brightness = 1 - $event"/>
+            <div class="handle"
+                :style="`left: ${color.saturation * 100}%; top: ${(1 - color.brightness) * 100}%; background: ${fullColorString};`">
+            </div>
+            <area-slider class="bar" v-model:x="color.saturation" :y="1 - color.brightness"
+                @update:y="color.brightness = 1 - $event" />
         </div>
 
         <div class="slider-layout">
@@ -15,9 +18,10 @@
                 </div>
                 <area-slider class="area" :padding="8" v-model:x="color.hue" />
             </div>
-            
+
             <div class="slider-wrapper alpha">
-                <div class="background" :style="`background: ${alphaColorGradientString}; color: ${fullColorString};`"></div>
+                <div class="background" :style="`background: ${alphaColorGradientString}; color: ${fullColorString};`">
+                </div>
                 <div class="handle-wrapper">
                     <div class="handle" :style="`left: ${color.alpha * 100}%;`"></div>
                 </div>
@@ -26,212 +30,214 @@
         </div>
 
         <div class="output-layout">
-            <select v-model="outputMode">
-                <option value="hex">Hex</option>
-                <option value="rgb">RGB</option>
-                <option value="hsl">HSL</option>
-                <option value="hsb">HSB</option>
-            </select>
+            <iodine-select v-model="outputMode" ref="outputSelector" :options="
+                [
+                    { value: 'hex', text: 'Hex' },
+                    { value: 'rgb', text: 'RGB' },
+                    { value: 'hsl', text: 'HSL' },
+                    { value: 'hsb', text: 'HSB' },
+                ]
+            "/>
 
             <div class="sub-layout">
                 <input type="text" :value="fullHexColorString">
-                
+
                 <input type="number" class="alpha" :value="Math.round(color.alpha * 100)" min="0" max="100">
             </div>
         </div>
 
         <div class="swatch-layout">
-            <select v-model="swatchPalette">
-                <option value="null">Select a palette</option>
-                <option v-for="palette in swatchPalettes" :value="palette.id" :key="palette.id">{{palette.name}}</option>
-            </select>
+            <iodine-select v-model="swatchPalette" :options="
+                [
+                    { value: 'null', text: 'Select a palette' },
+                ].concat(props.swatchPalettes?.map(e => ({ value: e.id, text: e.name })) ?? [])
+            "/>
             <div class="grid">
-                <div class="swatch" v-for="swatch in selectedSwatchPalette.colors" :key="swatch.hex" :style="`background: ${swatch.hex};`"></div>
+                <div class="swatch" v-for="swatch in selectedSwatchPalette.colors" :key="swatch.hex"
+                    :style="`background: ${swatch.hex};`"></div>
             </div>
         </div>
     </div>
 </template>
 
 <script lang="ts">
-    interface HSBColor {
-        hue: number;
-        saturation: number;
-        brightness: number;
-        alpha: number;
-    }
+interface HSBColor {
+    hue: number;
+    saturation: number;
+    brightness: number;
+    alpha: number;
+}
 
-    interface HSLColor {
-        hue: number;
-        saturation: number;
-        lightness: number;
-        alpha: number;
-    }
+interface HSLColor {
+    hue: number;
+    saturation: number;
+    lightness: number;
+    alpha: number;
+}
 
-    interface RGBColor {
-        red: number;
-        green: number;
-        blue: number;
-        alpha: number;
-    }
+interface RGBColor {
+    red: number;
+    green: number;
+    blue: number;
+    alpha: number;
+}
 
-    interface HexColor {
-        hex: string;
-    }
+interface HexColor {
+    hex: string;
+}
 
-    interface SwatchPalette {
-        id: string;
-        name: string;
-        colors: HexColor[];
-    }
+interface SwatchPalette {
+    id: string;
+    name: string;
+    colors: HexColor[];
+}
 </script>
 
 <script setup lang="ts">
-    import { ref, computed } from 'vue'
+import { ref, computed } from 'vue'
 
-    import AreaSlider from './partials/AreaSlider.vue'
-
-
-
-    const props = defineProps<{
-        swatchPalettes: SwatchPalette[]|undefined;
-    }>()
+import AreaSlider from './partials/AreaSlider.vue'
+import IodineSelect from './IodineSelect.vue'
 
 
 
-    const color = ref({ hue: 0, saturation: 1, brightness: 1, alpha: 1} as HSBColor)
-    const outputMode = ref('hex' as 'hex'|'rgb'|'hsl'|'hsb')
-    const swatchPalette = ref(null as string|null)
+const props = defineProps<{
+    swatchPalettes: SwatchPalette[] | undefined;
+}>()
 
 
 
-    const hueColorString = computed((): string => {
-        return `hsl(${color.value.hue * 360}, 100%, 50%)`
-    })
+const color = ref({ hue: 0, saturation: 1, brightness: 1, alpha: 1 } as HSBColor)
+const outputMode = ref('hex' as 'hex' | 'rgb' | 'hsl' | 'hsb')
+const swatchPalette = ref(null as string | null)
+const outputSelector = ref<typeof IodineSelect | null>(null)
 
-    const alphaColorGradientString = computed((): string => {
-        let hslColor = hsb2hsl(color.value)
-        return `linear-gradient(to right, hsl(${hslColor.hue * 360}deg, ${hslColor.saturation * 100}%, ${hslColor.lightness * 100}%, 0), hsl(${hslColor.hue * 360}deg, ${hslColor.saturation * 100}%, ${hslColor.lightness * 100}%, 1))`
-    })
-
-    const fullColorString = computed((): string => {
-        let hslColor = hsb2hsl(color.value)
-        return `hsl(${hslColor.hue * 360}deg ${hslColor.saturation * 100}% ${hslColor.lightness * 100}%)`
-    })
-
-    const fullHexColorString = computed((): string => {
-        return rgb2hex(hsb2rgb(color.value)).hex
-    })
-
-    const selectedSwatchPalette = computed((): SwatchPalette => {
-        return props.swatchPalettes?.find(e => e.id === swatchPalette.value) ?? { id: '', name: '', colors: [] }
-    })
+outputSelector.value?.value;
 
 
 
-    const hsb2hsl = (color: HSBColor): HSLColor => {
-        let { hue, saturation, brightness } = color
-        
-        let lightness = (2 - saturation) * brightness / 2
+const hueColorString = computed((): string => {
+    return `hsl(${color.value.hue * 360}, 100%, 50%)`
+})
 
-        if (lightness != 0)
-        {
-            if (lightness == 1)
-            {
-                saturation = 0
-            }
-            else if (lightness < .5)
-            {
-                saturation = saturation * brightness / (lightness * 2)
-            }
-            else
-            {
-                saturation = saturation * brightness / (2 - lightness * 2)
-            }
+const alphaColorGradientString = computed((): string => {
+    let hslColor = hsb2hsl(color.value)
+    return `linear-gradient(to right, hsl(${hslColor.hue * 360}deg, ${hslColor.saturation * 100}%, ${hslColor.lightness * 100}%, 0), hsl(${hslColor.hue * 360}deg, ${hslColor.saturation * 100}%, ${hslColor.lightness * 100}%, 1))`
+})
+
+const fullColorString = computed((): string => {
+    let hslColor = hsb2hsl(color.value)
+    return `hsl(${hslColor.hue * 360}deg ${hslColor.saturation * 100}% ${hslColor.lightness * 100}%)`
+})
+
+const fullHexColorString = computed((): string => {
+    return rgb2hex(hsb2rgb(color.value)).hex
+})
+
+const selectedSwatchPalette = computed((): SwatchPalette => {
+    return props.swatchPalettes?.find(e => e.id === swatchPalette.value) ?? { id: '', name: '', colors: [] }
+})
+
+
+
+const hsb2hsl = (color: HSBColor): HSLColor => {
+    let { hue, saturation, brightness } = color
+
+    let lightness = (2 - saturation) * brightness / 2
+
+    if (lightness != 0) {
+        if (lightness == 1) {
+            saturation = 0
         }
-
-        return {
-            hue,
-            saturation,
-            lightness,
-            alpha: color.alpha,
+        else if (lightness < .5) {
+            saturation = saturation * brightness / (lightness * 2)
+        }
+        else {
+            saturation = saturation * brightness / (2 - lightness * 2)
         }
     }
 
-    const hsb2rgb = (color: HSBColor): RGBColor => {
-        let { hue, saturation, brightness } = color
+    return {
+        hue,
+        saturation,
+        lightness,
+        alpha: color.alpha,
+    }
+}
 
-        let r, g, b
+const hsb2rgb = (color: HSBColor): RGBColor => {
+    let { hue, saturation, brightness } = color
 
-        if (saturation == 0)
-        {
-            r = g = b = brightness
-        }
-        else
-        {
-            let h = hue * 360 / 60
-            let i = Math.floor(h)
-            let f = h - i
-            let p = brightness * (1 - saturation)
-            let q = brightness * (1 - saturation * f)
-            let t = brightness * (1 - saturation * (1 - f))
+    let r, g, b
 
-            switch (i) {
-                case 0:
-                    r = brightness
-                    g = t
-                    b = p
-                    break
-                case 1:
-                    r = q
-                    g = brightness
-                    b = p
-                    break
-                case 2:
-                    r = p
-                    g = brightness
-                    b = t
-                    break
-                case 3:
-                    r = p
-                    g = q
-                    b = brightness
-                    break
-                case 4:
-                    r = t
-                    g = p
-                    b = brightness
-                    break
-                case 5:
-                    r = brightness
-                    g = p
-                    b = q
-                    break
-                default:
-                    r = brightness
-                    g = p
-                    b = q
-            }
-        }
+    if (saturation == 0) {
+        r = g = b = brightness
+    }
+    else {
+        let h = hue * 360 / 60
+        let i = Math.floor(h)
+        let f = h - i
+        let p = brightness * (1 - saturation)
+        let q = brightness * (1 - saturation * f)
+        let t = brightness * (1 - saturation * (1 - f))
 
-        return {
-            red: r,
-            green: g,
-            blue: b,
-            alpha: color.alpha,
+        switch (i) {
+            case 0:
+                r = brightness
+                g = t
+                b = p
+                break
+            case 1:
+                r = q
+                g = brightness
+                b = p
+                break
+            case 2:
+                r = p
+                g = brightness
+                b = t
+                break
+            case 3:
+                r = p
+                g = q
+                b = brightness
+                break
+            case 4:
+                r = t
+                g = p
+                b = brightness
+                break
+            case 5:
+                r = brightness
+                g = p
+                b = q
+                break
+            default:
+                r = brightness
+                g = p
+                b = q
         }
     }
 
-    const rgb2hex = (color: RGBColor): HexColor => {
-        let { red, green, blue } = color
-        
-        let r = Math.round(red * 255).toString(16).padStart(2, '0')
-        let g = Math.round(green * 255).toString(16).padStart(2, '0')
-        let b = Math.round(blue * 255).toString(16).padStart(2, '0')
-
-        return {
-            hex: `${r}${g}${b}`.toUpperCase()
-        }
+    return {
+        red: r,
+        green: g,
+        blue: b,
+        alpha: color.alpha,
     }
+}
+
+const rgb2hex = (color: RGBColor): HexColor => {
+    let { red, green, blue } = color
+
+    let r = Math.round(red * 255).toString(16).padStart(2, '0')
+    let g = Math.round(green * 255).toString(16).padStart(2, '0')
+    let b = Math.round(blue * 255).toString(16).padStart(2, '0')
+
+    return {
+        hex: `${r}${g}${b}`.toUpperCase()
+    }
+}
 </script>
 
 <style lang="sass" scoped>
@@ -415,7 +421,7 @@
                         margin: 0
                         appearance: none
 
-            select, input
+            input
                 border: none
                 background: var(--color-background-soft)
                 color: var(--color-text-soft)
@@ -426,9 +432,6 @@
                 border-radius: var(--radius-s)
                 height: 2rem
                 flex: none
-
-            select
-                width: 4rem
 
         .swatch-layout
             border-bottom: 1px solid var(--color-border)
