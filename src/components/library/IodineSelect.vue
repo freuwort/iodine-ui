@@ -3,6 +3,7 @@
     <IodineInput
       ref="inputComponent"
       :label="label"
+      :placeholder="placeholder"
       :autofocus="autofocus"
       :disabled="disabled"
       :required="required"
@@ -26,13 +27,16 @@
     />
 
     <pop-over :parent-rect="_DOMRect!" ref="popoverComponent">
-      <div class="select-dropdown-wrapper" :style="{
-        minWidth: _DOMRect.width.value + 'px',
-      }">
-        <div class="select-dropdown-item" v-for="(option, i) in props.options" :key="i" @mousedown="change(option)">
-          <!-- Mousedown instead of click due to event ordering. Prevents hiding of elements to interfere with this event dispatch -->
+      <div class="select-dropdown-wrapper" :style="{ minWidth: _DOMRect.width.value + 'px' }" ref="dropdownWrapper">
+        <!-- Mousedown instead of click due to event ordering. Prevents hiding of elements to interfere with this event dispatch -->
+        <button class="select-dropdown-item"
+          v-for="(option, i) in props.options"
+          :key="i"
+          :tabindex="popoverComponent?.showing ? 0 : -1"
+          @mousedown="change(option)"
+        >
           <span>{{option.text}}</span>
-        </div>
+        </button>
       </div>
     </pop-over>
   </div>
@@ -88,6 +92,7 @@ const props = defineProps({
     default: () => null as SelectInputTypes,
   },
   label: { type: String, default: "" },
+  placeholder: { type: String, default: "" },
 
   /* https://www.w3schools.com/tags/tag_select.asp */
   autofocus: { type: Boolean, default: false },
@@ -103,6 +108,7 @@ const props = defineProps({
 let _DOMRect = getEmptyRefDOMBounds();
 const inputComponent = ref<typeof IodineInput | null>(null);
 const popoverComponent = ref<typeof PopOver | null>(null);
+const dropdownWrapper = ref<HTMLElement | null>(null);
 const internalValue = ref(null) as Ref<SelectInputTypes>;
 //Functions
 
@@ -114,10 +120,11 @@ onMounted(() => {
 
   //find the first option that matches the modelValue
   const option = props.options.find((o) => o.value === props.modelValue);
-  if (option) {
+  
+  if (option)
+  {
     change(option);
   }
-
 });
 
 watch(() => props.modelValue, (value) => {
@@ -131,9 +138,12 @@ const selectedOptionText = computed({
   get() {
     //find the first option that matches the modelValue
     const option = props.options.find((o) => o.value === internalValue.value);
-    if (option) {
+
+    if (option)
+    {
       return option.text;
     }
+
     return "";
   },
 
@@ -146,33 +156,64 @@ const emits = defineEmits([
   'update:modelValue',
 ])
 
-const activate = (event: Event) => {
+function activate(event: Event)
+{
   if (popoverComponent.value == null) return;
 
-  if (event?.type === 'mousedown')
+  if (['mousedown'].includes(event?.type))
   {
     popoverComponent.value!.toggle();
     return;
   }
 
-  if (event?.type === 'blur')
+  // Bounce blur event if it comes from relatedTarget inside the popover
+  if (event instanceof FocusEvent)
+  {
+    let node = event.relatedTarget as HTMLElement
+
+    while (node)
+    {
+      if (node === dropdownWrapper.value)
+      {
+        setFocus()
+        break;
+      }
+
+      node = node.parentElement!;
+    }
+  }
+
+  if (['blur'].includes(event?.type))
   {
     popoverComponent.value!.showing = false;
     return;
   }
-};
-
-const change = (o: Option) => {
-  // console.log(`DEBUG --`, o);
-  internalValue.value = o.value;
-  emits('update:modelValue', o.value)
 }
 
+function change(option: Option)
+{
+  // console.log(`DEBUG:`, option);
+  internalValue.value = option.value;
+  emits('update:modelValue', option.value)
+}
+
+function setFocus()
+{
+  inputComponent.value?.focus()
+}
 </script>
 
 <style lang="sass" scoped>
 .iod-container.iod-select
-  display: contents
+  display: flex
+  height: 3rem
+  width: 200px
+  border-radius: var(--radius-m)
+
+  .iod-input
+    height: inherit
+    width: 100%
+    border-radius: inherit
 
   .dropdown-arrow
     transform: rotate(0deg)
@@ -205,6 +246,10 @@ const change = (o: Option) => {
     display: flex
     align-items: center
     justify-content: flex-start
+    color: inherit
+    background: transparent
+    border: none
+    font-size: inherit
 
     &::before
       content: ""

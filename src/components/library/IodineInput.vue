@@ -439,6 +439,7 @@
     // START: Misc
     const setFocus = (): void => {
         input.value.focus()
+        console.log('FOCUSING')
     }
 
     const toggleObfuscation = (): void => {
@@ -507,6 +508,13 @@
         validateInstantly()
     }, {
         immediate: true
+    })
+
+
+
+    // Expose public methods
+    defineExpose({
+        focus: setFocus,
     })
 </script>
 
@@ -603,7 +611,7 @@
             align-items: center
 
             .side-wrapper
-                padding: 0 .5em
+                padding: 0 var(--local-padding, .5rem)
                 display: flex
                 align-items: center
                 height: 100%
@@ -727,6 +735,7 @@
             width: 100%
             position: relative
             z-index: 2
+            overflow: hidden
 
             .inner-input-wrapper
                 flex: 1

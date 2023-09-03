@@ -30,7 +30,7 @@
         </div>
 
         <div class="output-layout">
-            <iodine-select v-model="outputMode" ref="outputSelector" :options="
+            <IodineSelect v-model="outputMode" ref="outputSelector" :options="
                 [
                     { value: 'hex', text: 'Hex' },
                     { value: 'rgb', text: 'RGB' },
@@ -40,17 +40,15 @@
             "/>
 
             <div class="sub-layout">
-                <input type="text" :value="fullHexColorString">
+                <IodineInput type="text" :modelValue="fullHexColorString" />
 
-                <input type="number" class="alpha" :value="Math.round(color.alpha * 100)" min="0" max="100">
+                <IodineInput type="number" class="alpha" :modelValue="Math.round(color.alpha * 100)" min="0" max="100" />
             </div>
         </div>
 
         <div class="swatch-layout">
-            <iodine-select v-model="swatchPalette" :options="
-                [
-                    { value: null, text: 'Select a palette' },
-                ].concat(props.swatchPalettes?.map(e => ({ value: e.id, text: e.name })) ?? [])
+            <IodineSelect class="swatchSelector" placeholder="Select a palette" v-model="swatchPalette" :options="
+                props.swatchPalettes?.map(e => ({ value: e.id, text: e.name })) ?? []
             "/>
             <div class="grid">
                 <div class="swatch" v-for="swatch in selectedSwatchPalette.colors" :key="swatch.hex"
@@ -98,6 +96,7 @@ import { ref, computed } from 'vue'
 
 import AreaSlider from './partials/AreaSlider.vue'
 import IodineSelect from './IodineSelect.vue'
+import IodineInput from './IodineInput.vue'
 
 
 
@@ -409,12 +408,11 @@ function rgb2hex (color: RGBColor): HexColor
                 display: flex
                 align-items: center
                 gap: 1rem
-                
-                input
-                    width: 0
+
+                .iod-input
                     flex: 1
-                    &[type="number"]
-                        -moz-appearance: textfield
+                    height: 2rem
+                    --local-padding: .25rem
 
                 .alpha
                     width: 3rem
@@ -426,17 +424,11 @@ function rgb2hex (color: RGBColor): HexColor
                         margin: 0
                         appearance: none
 
-            input
-                border: none
-                background: var(--color-background-soft)
-                color: var(--color-text-soft)
-                font-family: var(--font-text)
-                padding: 0 .5rem
-                min-width: 0
-                margin: 0
-                border-radius: var(--radius-s)
+            .iod-select
+                width: 5rem
                 height: 2rem
                 flex: none
+                --local-padding: .25rem
 
         .swatch-layout
             border-bottom: 1px solid var(--color-border)
@@ -445,17 +437,11 @@ function rgb2hex (color: RGBColor): HexColor
             gap: 1rem
             padding: 1rem
 
-            select, input
-                border: none
-                background: var(--color-background-soft)
-                color: var(--color-text-soft)
-                font-family: var(--font-text)
-                padding: 0 .5rem
-                min-width: 0
-                margin: 0
-                border-radius: var(--radius-s)
+            .iod-select
+                width: 100%
                 height: 2rem
                 flex: none
+                --local-padding: .25rem
             
             .grid
                 display: grid

@@ -248,9 +248,9 @@
                 <div class="group">
                     <h2>Picker</h2>
                     <div class="flex gap-1">
-                        <IodineIconpicker :icons="icons">
+                        <!-- <IodineIconpicker :icons="icons">
                             <IodineButton type="button" label="Open Iconpicker"/>
-                        </IodineIconpicker>
+                        </IodineIconpicker> -->
                         <IodineColorpicker :swatch-palettes="swatchPalettes">
                             <IodineButton type="button" label="Open Colopicker"/>
                         </IodineColorpicker>
@@ -262,16 +262,14 @@
                         <select style="width:100px">
                             <option value="a">AAAAAaa aAAAa AAAAaaa AAAaaAA  AAaaaaaaA AAAaaa AAAaA AAAAAaa aAAAa AAAAaaa AAAaaAA  AAaaaaaaA AAAaaa AAAaA AAAAAaa aAAAa AAAAaaa AAAaaAA  AAaaaaaaA AAAaaa AAAaA AAAAAaa aAAAa AAAAaaa AAAaaAA  AAaaaaaaA AAAaaa AAAaA AAAAAaa aAAAa AAAAaaa AAAaaAA  AAaaaaaaA AAAaaa AAAaA AAAAAaa aAAAa AAAAaaa AAAaaAA  AAaaaaaaA AAAaaa AAAaA</option>
                         </select>
-                        <iodine-select label="Choose an 'AAaA'" :options="
-                        [
-                            {
+                        <IodineSelect style="height: 2.5rem" label="Choose an 'AAaA'" :options="[
+                        {
                             text: 'AAAAAaa aAAAa AAAAaaa AAAaaAA  AAaaaaaaA AAAaaa AAAaA AAAAAaa aAAAa AAAAaaa AAAaaAA  AAaaaaaaA AAAaaa AAAaA AAAAAaa aAAAa AAAAaaa AAAaaAA  AAaaaaaaA AAAaaa AAAaA AAAAAaa aAAAa AAAAaaa AAAaaAA  AAaaaaaaA AAAaaa AAAaA AAAAAaa aAAAa AAAAaaa AAAaaAA  AAaaaaaaA AAAaaa AAAaA AAAAAaa aAAAa AAAAaaa AAAaaAA  AAaaaaaaA AAAaaa AAAaA',
                             value: 'a'
                         },{
                             text: 'AAAAAaa aAAAa AAAAaaa AAAaaAA  AAaaaaaaA AAAaaa AAAaA AAAAAaa aAAAa AAAAaaa AAAaaAA  AAaaaaaaA AAAaaa AAAaA AAAAAaa aAAAa AAAAaaa AAAaaAA  AAaaaaaaA AAAaaa AAAaA AAAAAaa aAAAa AAAAaaa AAAaaAA  AAaaaaaaA AAAaaa AAAaA AAAAAaa aAAAa AAAAaaa AAAaaAA  AAaaaaaaA AAAaaa AAAaA AAAAAaa aAAAa AAAAaaa AAAaaAA  AAaaaaaaA AAAaaa AAAaA',
                             value: 'a'
-                        }]">
-                        </iodine-select>
+                        }]"/>
                     </div>
                 </div>
             </div>
