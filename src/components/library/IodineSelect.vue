@@ -9,6 +9,7 @@
       :required="required"
       :size="size"
       :readonly="true"
+      :border="border"
       v-model="selectedOptionText"
       @mousedown="activate"
       @blur="activate"
@@ -93,6 +94,7 @@ const props = defineProps({
   },
   label: { type: String, default: "" },
   placeholder: { type: String, default: "" },
+  border: { type: Boolean, default: false },
 
   /* https://www.w3schools.com/tags/tag_select.asp */
   autofocus: { type: Boolean, default: false },
