@@ -222,6 +222,12 @@
                         <IodineSelect class="flex-1" :options="selectOptions" label="Label" required disabled />
                         <IodineSelect class="flex-1" :options="selectOptions" label="Label" required border disabled />
                     </div>
+                    <div class="flex gap-1 v-center">
+                        <IodineSelect class="flex-1" :options="selectOptions" label="Label" multiple required />
+                        <IodineSelect class="flex-1" :options="selectOptions" label="Label" multiple required border />
+                        <IodineSelect class="flex-1" :options="selectOptions" label="Label" multiple required disabled />
+                        <IodineSelect class="flex-1" :options="selectOptions" label="Label" multiple required border disabled />
+                    </div>
                 </div>
     
                 <div class="group">

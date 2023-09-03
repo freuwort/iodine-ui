@@ -139,6 +139,13 @@ watch(() => props.modelValue, (value) => {
 
 const selectedOptionText = computed({
   get() {
+
+    if(props.multiple && internalValue.value instanceof Array)
+    {
+      let options = props.options.filter((o) => (internalValue.value as InputTypes_[]).includes(o.value));
+      return options.map((o) => o.text).join(", ");
+    }
+
     //find the first option that matches the modelValue
     const option = props.options.find((o) => o.value === internalValue.value);
 
@@ -195,9 +202,31 @@ function activate(event: Event)
 
 function change(option: Option)
 {
-  //TODO: implement multiple options
+  if(props.multiple)
+  {
+    if(!(internalValue.value instanceof Array))
+    {
+      internalValue.value = [];
+    }
+
+    if(!internalValue.value.includes(option.value))
+    {
+      //If not already selected, add it
+      internalValue.value.push(option.value);
+    }
+    else
+    {
+      //If already selected, remove it
+      internalValue.value = internalValue.value.filter((o) => o !== option.value);
+    }
+
+    emits('update:modelValue', internalValue.value)
+    console.log(internalValue.value)
+    return;
+  }
+
   internalValue.value = option.value;
-  emits('update:modelValue', option.value)
+  emits('update:modelValue', internalValue.value)
 }
 
 function setFocus()
