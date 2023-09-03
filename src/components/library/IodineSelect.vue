@@ -34,7 +34,7 @@
           v-for="(option, i) in props.options"
           :key="i"
           :tabindex="popoverComponent?.showing ? 0 : -1"
-          @mousedown="change(option)"
+          @mousedown="!option.disabled && change(option)"
         >
           <span>{{option.text}}</span>
         </button>
@@ -100,11 +100,12 @@ const props = defineProps({
   autofocus: { type: Boolean, default: false },
   disabled: { type: Boolean, default: false },
   form: { type: String, default: "" },
-  multiple: { type: Boolean, default: false },
+  multiple: { type: Boolean, default: false }, //TODO: implement attribute (multiple selection)
   name: { type: String, default: "" },
   required: { type: Boolean, default: false },
-  size: { type: Number, default: 4 },
+  size: { type: Number, default: 4 }, //TODO: implement attribute (size of the list)
   /* https://www.w3schools.com/tags/ref_standardattributes.asp */
+  //TODO: implement global attributes
 });
 
 let _DOMRect = getEmptyRefDOMBounds();
@@ -194,7 +195,7 @@ function activate(event: Event)
 
 function change(option: Option)
 {
-  // console.log(`DEBUG:`, option);
+  //TODO: implement multiple options
   internalValue.value = option.value;
   emits('update:modelValue', option.value)
 }
@@ -252,6 +253,9 @@ function setFocus()
     background: transparent
     border: none
     font-size: inherit
+
+    //TODO: Implement disabled styling @Alyx
+
 
     &::before
       content: ""
