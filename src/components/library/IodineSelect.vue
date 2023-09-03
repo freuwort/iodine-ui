@@ -100,7 +100,7 @@ const props = defineProps({
   autofocus: { type: Boolean, default: false },
   disabled: { type: Boolean, default: false },
   form: { type: String, default: "" },
-  multiple: { type: Boolean, default: false }, //TODO: implement attribute (multiple selection)
+  multiple: { type: Boolean, default: false },
   name: { type: String, default: "" },
   required: { type: Boolean, default: false },
   size: { type: Number, default: 4 }, //TODO: implement attribute (size of the list)
