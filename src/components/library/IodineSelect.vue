@@ -35,6 +35,7 @@
           :key="i"
           :tabindex="popoverComponent?.showing ? 0 : -1"
           @mousedown="!option.disabled && change(option)"
+          @blur="checkOptionCloseOnBlur"
         >
           <span>{{option.text}}</span>
         </button>
@@ -186,6 +187,10 @@ function activate(event: Event)
       if (node === dropdownWrapper.value)
       {
         setFocus()
+        if(props.multiple)
+        {
+         return;
+        }
         break;
       }
 
@@ -198,6 +203,23 @@ function activate(event: Event)
     popoverComponent.value!.showing = false;
     return;
   }
+}
+
+function checkOptionCloseOnBlur(event: FocusEvent)
+{
+  if(!props.multiple) return;
+  let node = event.relatedTarget as HTMLElement
+
+  while (node)
+  {
+    if (node === dropdownWrapper.value || node === inputComponent.value?.$el)
+    {
+      return
+    }
+    node = node.parentElement!;
+  }
+  //we clicked outside, hide the popover
+  popoverComponent.value!.showing = false;
 }
 
 function change(option: Option)
@@ -221,7 +243,6 @@ function change(option: Option)
     }
 
     emits('update:modelValue', internalValue.value)
-    console.log(internalValue.value)
     return;
   }
 
