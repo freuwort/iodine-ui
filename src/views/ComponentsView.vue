@@ -319,7 +319,7 @@
     const bool = ref(false)
     const selectOptions = ref([
         { text: 'No Option', value: null },
-        { text: 'Option 1', value: 1 },
+        { text: 'Option 1', value: 1, disabled: true},
         { text: 'Option 2', value: 2 },
         { text: 'Option 3', value: 3 },
         { text: 'Option 4', value: 4 },

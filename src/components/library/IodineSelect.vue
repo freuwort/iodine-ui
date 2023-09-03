@@ -34,6 +34,8 @@
           v-for="(option, i) in props.options"
           :key="i"
           :tabindex="popoverComponent?.showing ? 0 : -1"
+          :data-disabled="option.disabled"
+          :data-selected="selectedOptions.includes(option)"
           @mousedown="!option.disabled && change(option)"
           @blur="checkOptionCloseOnBlur"
         >
@@ -136,6 +138,24 @@ watch(() => props.modelValue, (value) => {
 }, {
   deep: true,
   immediate: true,
+});
+
+const selectedOptions = computed(()=>{
+    if(props.multiple && internalValue.value instanceof Array)
+    {
+      let options = props.options.filter((o) => (internalValue.value as InputTypes_[]).includes(o.value));
+      return options;
+    }
+
+    //find the first option that matches the modelValue
+    const option = props.options.find((o) => o.value === internalValue.value);
+
+    if (option)
+    {
+      return [option];
+    }
+
+    return [];
 });
 
 const selectedOptionText = computed({
@@ -323,6 +343,14 @@ function setFocus()
 
       &::before
         opacity: .1
+    
+    &[data-disabled]
+        color: grey
+        cursor: not-allowed
+    &[data-selected="true"]
+      color: green
+      font-weight: bold
+
 
     > span
       position: relative
@@ -333,7 +361,7 @@ function setFocus()
       // Dont display the scrollbar
       scrollbar-width: none
       -ms-overflow-style: none
-      
+
       &::-webkit-scrollbar
         display: none
 
