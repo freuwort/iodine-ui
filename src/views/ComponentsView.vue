@@ -229,7 +229,7 @@
                         <IodineSelect class="flex-1" :options="selectOptions" label="Label" indicatorStyle="box" border />
                     </div>
                     <div class="flex gap-1 v-center">
-                        <IodineSelect class="flex-1" :options="selectOptions" label="Label" multiple required :max-size-p-x="100" />
+                        <IodineSelect class="flex-1" :options="selectOptions" label="Label" multiple required :max-size="'100px'" />
                         <IodineSelect class="flex-1" :options="selectOptions" label="Label" multiple required border />
                         <IodineSelect class="flex-1" :options="selectOptions" label="Label" multiple required indicatorStyle="box" />
                         <IodineSelect class="flex-1" :options="selectOptions" label="Label" multiple required indicatorStyle="box" border />

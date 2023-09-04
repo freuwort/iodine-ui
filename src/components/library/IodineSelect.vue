@@ -29,7 +29,7 @@
     />
 
     <pop-over :parent-rect="_DOMRect!" ref="popoverComponent">
-      <div class="select-dropdown-wrapper" :style="{ minWidth: _DOMRect.width.value + 'px', maxHeight: maxSizePX + 'px'}"  ref="dropdownWrapper" tabindex="-1"
+      <div class="select-dropdown-wrapper" :style="{ minWidth: _DOMRect.width.value + 'px', maxHeight: maxSize}"  ref="dropdownWrapper" tabindex="-1"
       @keydown="handleKeyDown"
       >
         <!-- Mousedown instead of click due to event ordering. Prevents hiding of elements to interfere with this event dispatch -->
@@ -108,7 +108,7 @@ const props = defineProps({
   placeholder: { type: String, default: "" },
   border: { type: Boolean, default: false },
   indicatorStyle: { type: String, default: "side" as "side" | "box" },
-  maxSizePX: { type: Number, default: 300 },
+  maxSize: { type: String, default: "" },
 
   /* https://www.w3schools.com/tags/tag_select.asp */
   autofocus: { type: Boolean, default: false },
