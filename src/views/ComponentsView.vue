@@ -229,7 +229,7 @@
                         <IodineSelect class="flex-1" :options="selectOptions" label="Label" indicatorStyle="box" border />
                     </div>
                     <div class="flex gap-1 v-center">
-                        <IodineSelect class="flex-1" :options="selectOptions" label="Label" multiple required />
+                        <IodineSelect class="flex-1" :options="selectOptions" label="Label" multiple required :max-size-p-x="100" />
                         <IodineSelect class="flex-1" :options="selectOptions" label="Label" multiple required border />
                         <IodineSelect class="flex-1" :options="selectOptions" label="Label" multiple required indicatorStyle="box" />
                         <IodineSelect class="flex-1" :options="selectOptions" label="Label" multiple required indicatorStyle="box" border />
@@ -282,7 +282,19 @@
                     <h2>Lynn's Playground</h2>
                     <div class="flex gap-1">
                         <select style="width:100px">
-                            <option value="a">AAAAAaa aAAAa AAAAaaa AAAaaAA  AAaaaaaaA AAAaaa AAAaA AAAAAaa aAAAa AAAAaaa AAAaaAA  AAaaaaaaA AAAaaa AAAaA AAAAAaa aAAAa AAAAaaa AAAaaAA  AAaaaaaaA AAAaaa AAAaA AAAAAaa aAAAa AAAAaaa AAAaaAA  AAaaaaaaA AAAaaa AAAaA AAAAAaa aAAAa AAAAaaa AAAaaAA  AAaaaaaaA AAAaaa AAAaA AAAAAaa aAAAa AAAAaaa AAAaaAA  AAaaaaaaA AAAaaa AAAaA</option>
+                            <option value="a">AAaaaa</option>
+                            <option value="a">AAaaaa</option>
+                            <option value="a">AAaaaa</option>
+                            <option value="a">AAaaaa</option>
+                            <option value="a">AAaaaa</option>
+                            <option value="a">AAaaaa</option>
+                            <option value="a">AAaaaa</option>
+                            <option value="a">AAaaaa</option>
+                            <option value="a">AAaaaa</option>
+                            <option value="a">AAaaaa</option>
+                            <option value="a">AAaaaa</option>
+                            <option value="a">AAaaaa</option>
+                            <option value="a">AAaaaa</option>
                         </select>
                         <IodineSelect style="height: 2.5rem" label="Choose an 'AAaA'" :options="[
                         {

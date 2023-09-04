@@ -29,7 +29,7 @@
     />
 
     <pop-over :parent-rect="_DOMRect!" ref="popoverComponent">
-      <div class="select-dropdown-wrapper" :style="{ minWidth: _DOMRect.width.value + 'px' }"  ref="dropdownWrapper" tabindex="-1"
+      <div class="select-dropdown-wrapper" :style="{ minWidth: _DOMRect.width.value + 'px', maxHeight: maxSizePX + 'px'}"  ref="dropdownWrapper" tabindex="-1"
       @keydown="handleKeyDown"
       >
         <!-- Mousedown instead of click due to event ordering. Prevents hiding of elements to interfere with this event dispatch -->
@@ -60,7 +60,7 @@ export type SelectInputTypes = InputTypes_ | InputTypes_[];
 </script>
 
 <script setup lang="ts">
-import { onMounted, getCurrentInstance, Ref, PropType, ref, watch, computed } from "vue";
+import { onMounted, getCurrentInstance, Ref, PropType, ref, watch, computed, nextTick } from "vue";
 import {getEmptyRefDOMBounds, useElementBounding} from './helpers/refDOMBounds';
 
 import PopOver from "./partials/PopOver.vue";
@@ -108,6 +108,7 @@ const props = defineProps({
   placeholder: { type: String, default: "" },
   border: { type: Boolean, default: false },
   indicatorStyle: { type: String, default: "side" as "side" | "box" },
+  maxSizePX: { type: Number, default: 300 },
 
   /* https://www.w3schools.com/tags/tag_select.asp */
   autofocus: { type: Boolean, default: false },
@@ -131,7 +132,28 @@ const highlightedOption = ref<Option | null>(null);
 
 function highlightOption(option: Option)
 {
+  if(option.disabled)
+  {
+    highlightedOption.value = null;
+    return;
+  }
+
   highlightedOption.value = option;
+
+  nextTick(() => {
+    //scroll into view
+    const item = dropdownWrapper.value?.querySelector(`[data-highlighted="true"]`) as HTMLElement;
+
+    if(item == null) return;
+
+    dropdownWrapper.value?.scrollTo({
+      top: item.offsetTop
+      - dropdownWrapper.value.offsetTop
+      + (item.offsetHeight/2)
+      - (dropdownWrapper.value.offsetHeight / 2),
+      behavior: "smooth",
+    })
+  });
 }
 
 function handleKeyDown(event: KeyboardEvent)
@@ -154,24 +176,64 @@ function handleKeyDown(event: KeyboardEvent)
     case "ArrowDown":
       if(highlightedOption.value == null)
       {
-        highlightedOption.value = props.options[0];
+        let index = 0;
+        const nextIndex = () => {
+          // x + (n-1) % n is a trick to substract 1 and wrap around to the end of the array
+          index = (index + 1) % props.options.length
+        }
+        for(let i = 0;i < props.options.length + 1 && props.options[index].disabled; i++)
+        {
+          nextIndex();
+        }
+        highlightOption(highlightedOption.value = props.options[index]);
       }
       else
       {
-        const index = props.options.indexOf(highlightedOption.value);
-        highlightedOption.value = props.options[(index + 1) % props.options.length];
+        let index = props.options.indexOf(highlightedOption.value);
+
+        const nextIndex = () => {
+          // x + (n-1) % n is a trick to substract 1 and wrap around to the end of the array
+          index = (index + 1) % props.options.length
+        }
+
+        nextIndex();
+        for(let i = 0;i < props.options.length + 1 && props.options[index].disabled; i++)
+        {
+          nextIndex();
+        }
+
+        highlightOption(props.options[index]);
       }
       break;
     case "ArrowUp":
       if(highlightedOption.value == null)
       {
-        highlightedOption.value = props.options[props.options.length - 1];
+        let index = props.options.length - 1;
+        const nextIndex = () => {
+          // x + (n-1) % n is a trick to substract 1 and wrap around to the end of the array
+          index = (index + props.options.length - 1) % props.options.length
+        }
+        for(let i = 0;i < props.options.length + 1 && props.options[index].disabled; i++)
+        {
+          nextIndex();
+        }
+        highlightOption(props.options[props.options.length - 1]);
       }
       else
       {
-        const index = props.options.indexOf(highlightedOption.value);
-        // x + (n-1) % n is a trick to substract 1 and wrap around to the end of the array
-        highlightedOption.value = props.options[(index + props.options.length - 1) % props.options.length];
+        let index = props.options.indexOf(highlightedOption.value);
+        const nextIndex = () => {
+          // x + (n-1) % n is a trick to substract 1 and wrap around to the end of the array
+          index = (index + props.options.length - 1) % props.options.length
+        }
+
+        nextIndex();
+        for(let i = 0;i < props.options.length + 1 && props.options[index].disabled; i++)
+        {
+          nextIndex();
+        }
+
+        highlightOption(props.options[index])
       }
       break;
     case "Enter":
@@ -191,12 +253,13 @@ function handleKeyDown(event: KeyboardEvent)
       popoverComponent.value!.showing = false;
       break;
   }
-
 }
 
 onMounted(() => {
+  console.log(props.maxSizePX)
   const instance = getCurrentInstance();
   const el = instance?.vnode.el as HTMLElement;
+  console.log(el)
   _DOMRect = useElementBounding(el.firstChild as HTMLElement, _DOMRect);
 
   //find the first option that matches the modelValue
