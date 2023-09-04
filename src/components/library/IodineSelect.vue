@@ -13,6 +13,7 @@
       v-model="selectedOptionText"
       @mousedown="activate"
       @blur="activate"
+      @keydown="handleKeyDown"
     >
       <template #right>
         <DropdownArrowIcon class="dropdown-arrow" :class="{'open': popoverComponent?.showing}"/>
@@ -28,7 +29,9 @@
     />
 
     <pop-over :parent-rect="_DOMRect!" ref="popoverComponent">
-      <div class="select-dropdown-wrapper" :style="{ minWidth: _DOMRect.width.value + 'px' }" ref="dropdownWrapper" tabindex="-1">
+      <div class="select-dropdown-wrapper" :style="{ minWidth: _DOMRect.width.value + 'px' }"  ref="dropdownWrapper" tabindex="-1"
+      @keydown="handleKeyDown"
+      >
         <!-- Mousedown instead of click due to event ordering. Prevents hiding of elements to interfere with this event dispatch -->
         <button
           class="select-dropdown-item"
@@ -38,8 +41,10 @@
           :disabled="option.disabled"
           :data-selected="selectedOptions.includes(option)"
           :data-indicator-style="indicatorStyle"
+          :data-highlighted="highlightedOption === option"
           @mousedown="!option.disabled && change(option)"
           @blur="checkOptionCloseOnBlur"
+          @mouseenter="highlightOption(option)"
         >
           <IodineToggle v-if="indicatorStyle === 'box'" :modelValue="selectedOptions.includes(option)" readonly />
           <span>{{option.text}}</span>
@@ -121,8 +126,73 @@ const inputComponent = ref<typeof IodineInput | null>(null);
 const popoverComponent = ref<typeof PopOver | null>(null);
 const dropdownWrapper = ref<HTMLElement | null>(null);
 const internalValue = ref(null) as Ref<SelectInputTypes>;
+const highlightedOption = ref<Option | null>(null);
 //Functions
 
+function highlightOption(option: Option)
+{
+  highlightedOption.value = option;
+}
+
+function handleKeyDown(event: KeyboardEvent)
+{
+  console.log("handleKeyDown", event);
+
+  const keys = [
+    "ArrowDown",
+    "ArrowUp",
+    "Enter",
+    "Escape",
+  ];
+
+  if(!keys.includes(event.key)) { return; }
+
+  event.preventDefault();
+
+  switch(event.key)
+  {
+    case "ArrowDown":
+      if(highlightedOption.value == null)
+      {
+        highlightedOption.value = props.options[0];
+      }
+      else
+      {
+        const index = props.options.indexOf(highlightedOption.value);
+        highlightedOption.value = props.options[(index + 1) % props.options.length];
+      }
+      break;
+    case "ArrowUp":
+      if(highlightedOption.value == null)
+      {
+        highlightedOption.value = props.options[props.options.length - 1];
+      }
+      else
+      {
+        const index = props.options.indexOf(highlightedOption.value);
+        // x + (n-1) % n is a trick to substract 1 and wrap around to the end of the array
+        highlightedOption.value = props.options[(index + props.options.length - 1) % props.options.length];
+      }
+      break;
+    case "Enter":
+
+      if(!popoverComponent.value!.showing)
+      {
+        popoverComponent.value!.showing = true;
+        return;
+      }
+
+      if(highlightedOption.value != null)
+      {
+        change(highlightedOption.value);
+      }
+      break;
+    case "Escape":
+      popoverComponent.value!.showing = false;
+      break;
+  }
+
+}
 
 onMounted(() => {
   const instance = getCurrentInstance();
@@ -249,6 +319,9 @@ function checkOptionCloseOnBlur(event: FocusEvent)
 
 function change(option: Option)
 {
+
+  if(option.disabled) return;
+
   if(props.multiple)
   {
     if(!(internalValue.value instanceof Array))
@@ -365,7 +438,7 @@ function setFocus()
 
 
 
-    &:hover
+    &[data-highlighted="true"]
       color: var(--color-text)
 
       &::before
@@ -389,7 +462,7 @@ function setFocus()
       cursor: initial
 
       &::before
-        opacity: 0 !important
+        //opacity: 0 !important
 
       > .iod-toggle
         --local-color-off: var(--color-border)
