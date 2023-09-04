@@ -158,7 +158,6 @@ function highlightOption(option: Option)
 
 function handleKeyDown(event: KeyboardEvent)
 {
-  console.log("handleKeyDown", event);
 
   const keys = [
     "ArrowDown",
@@ -256,10 +255,8 @@ function handleKeyDown(event: KeyboardEvent)
 }
 
 onMounted(() => {
-  console.log(props.maxSizePX)
   const instance = getCurrentInstance();
   const el = instance?.vnode.el as HTMLElement;
-  console.log(el)
   _DOMRect = useElementBounding(el.firstChild as HTMLElement, _DOMRect);
 
   //find the first option that matches the modelValue
