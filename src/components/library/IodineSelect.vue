@@ -177,7 +177,6 @@ function handleKeyDown(event: KeyboardEvent)
       {
         let index = 0;
         const nextIndex = () => {
-          // x + (n-1) % n is a trick to substract 1 and wrap around to the end of the array
           index = (index + 1) % props.options.length
         }
         for(let i = 0;i < props.options.length + 1 && props.options[index].disabled; i++)
@@ -191,7 +190,6 @@ function handleKeyDown(event: KeyboardEvent)
         let index = props.options.indexOf(highlightedOption.value);
 
         const nextIndex = () => {
-          // x + (n-1) % n is a trick to substract 1 and wrap around to the end of the array
           index = (index + 1) % props.options.length
         }
 
