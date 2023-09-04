@@ -58,5 +58,9 @@ npm run build
 ```
 <br>
 
+## Credits 📜
+Developed by [Alyx Freuwört](https://github.com/freuwoert) & [Lynn Schallenberg](https://github.com/LynnCinnamon)  
+<br>
+
 ## License 📜
 [MIT](http://opensource.org/licenses/MIT) – 2023
