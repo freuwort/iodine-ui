@@ -135,25 +135,29 @@ function highlightOption(option: Option)
   if(option.disabled)
   {
     highlightedOption.value = null;
-    return;
+    return {scroll: () => undefined};
   }
 
   highlightedOption.value = option;
 
-  nextTick(() => {
-    //scroll into view
-    const item = dropdownWrapper.value?.querySelector(`[data-highlighted="true"]`) as HTMLElement;
+  return {
+    scroll: () =>{
+      nextTick(() => {
+        //scroll into view
+        const item = dropdownWrapper.value?.querySelector(`[data-highlighted="true"]`) as HTMLElement;
 
-    if(item == null) return;
+        if(item == null) return;
 
-    dropdownWrapper.value?.scrollTo({
-      top: item.offsetTop
-      - dropdownWrapper.value.offsetTop
-      + (item.offsetHeight/2)
-      - (dropdownWrapper.value.offsetHeight / 2),
-      behavior: "smooth",
-    })
-  });
+        dropdownWrapper.value?.scrollTo({
+          top: item.offsetTop
+          - dropdownWrapper.value.offsetTop
+          + (item.offsetHeight/2)
+          - (dropdownWrapper.value.offsetHeight / 2),
+          behavior: "smooth",
+        })
+      });
+    }
+  }
 }
 
 function handleKeyDown(event: KeyboardEvent)
@@ -183,7 +187,7 @@ function handleKeyDown(event: KeyboardEvent)
         {
           nextIndex();
         }
-        highlightOption(highlightedOption.value = props.options[index]);
+        highlightOption(highlightedOption.value = props.options[index]).scroll();
       }
       else
       {
@@ -199,7 +203,7 @@ function handleKeyDown(event: KeyboardEvent)
           nextIndex();
         }
 
-        highlightOption(props.options[index]);
+        highlightOption(props.options[index]).scroll();
       }
       break;
     case "ArrowUp":
@@ -214,7 +218,7 @@ function handleKeyDown(event: KeyboardEvent)
         {
           nextIndex();
         }
-        highlightOption(props.options[props.options.length - 1]);
+        highlightOption(props.options[props.options.length - 1]).scroll();
       }
       else
       {
@@ -230,7 +234,7 @@ function handleKeyDown(event: KeyboardEvent)
           nextIndex();
         }
 
-        highlightOption(props.options[index])
+        highlightOption(props.options[index]).scroll()
       }
       break;
     case "Enter":
