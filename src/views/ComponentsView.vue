@@ -223,10 +223,16 @@
                         <IodineSelect class="flex-1" :options="selectOptions" label="Label" required border disabled />
                     </div>
                     <div class="flex gap-1 v-center">
+                        <IodineSelect class="flex-1" :options="selectOptions" label="Label" />
+                        <IodineSelect class="flex-1" :options="selectOptions" label="Label" border />
+                        <IodineSelect class="flex-1" :options="selectOptions" label="Label" indicatorStyle="box" />
+                        <IodineSelect class="flex-1" :options="selectOptions" label="Label" indicatorStyle="box" border />
+                    </div>
+                    <div class="flex gap-1 v-center">
                         <IodineSelect class="flex-1" :options="selectOptions" label="Label" multiple required />
                         <IodineSelect class="flex-1" :options="selectOptions" label="Label" multiple required border />
-                        <IodineSelect class="flex-1" :options="selectOptions" label="Label" multiple required disabled />
-                        <IodineSelect class="flex-1" :options="selectOptions" label="Label" multiple required border disabled />
+                        <IodineSelect class="flex-1" :options="selectOptions" label="Label" multiple required indicatorStyle="box" />
+                        <IodineSelect class="flex-1" :options="selectOptions" label="Label" multiple required indicatorStyle="box" border />
                     </div>
                 </div>
     

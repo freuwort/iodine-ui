@@ -28,17 +28,20 @@
     />
 
     <pop-over :parent-rect="_DOMRect!" ref="popoverComponent">
-      <div class="select-dropdown-wrapper" :style="{ minWidth: _DOMRect.width.value + 'px' }" ref="dropdownWrapper">
+      <div class="select-dropdown-wrapper" :style="{ minWidth: _DOMRect.width.value + 'px' }" ref="dropdownWrapper" tabindex="-1">
         <!-- Mousedown instead of click due to event ordering. Prevents hiding of elements to interfere with this event dispatch -->
-        <button class="select-dropdown-item"
+        <button
+          class="select-dropdown-item"
           v-for="(option, i) in props.options"
           :key="i"
           :tabindex="popoverComponent?.showing ? 0 : -1"
-          :data-disabled="option.disabled"
+          :disabled="option.disabled"
           :data-selected="selectedOptions.includes(option)"
+          :data-indicator-style="indicatorStyle"
           @mousedown="!option.disabled && change(option)"
           @blur="checkOptionCloseOnBlur"
         >
+          <IodineToggle v-if="indicatorStyle === 'box'" :modelValue="selectedOptions.includes(option)" readonly />
           <span>{{option.text}}</span>
         </button>
       </div>
@@ -57,6 +60,7 @@ import {getEmptyRefDOMBounds, useElementBounding} from './helpers/refDOMBounds';
 
 import PopOver from "./partials/PopOver.vue";
 import IodineInput from "@/components/library/IodineInput.vue";
+import IodineToggle from "@/components/library/IodineToggle.vue";
 import DropdownArrowIcon from "@/components/library/icons/DropdownArrowIcon.vue";
 
 /*
@@ -98,6 +102,7 @@ const props = defineProps({
   label: { type: String, default: "" },
   placeholder: { type: String, default: "" },
   border: { type: Boolean, default: false },
+  indicatorStyle: { type: String, default: "side" as "side" | "box" },
 
   /* https://www.w3schools.com/tags/tag_select.asp */
   autofocus: { type: Boolean, default: false },
@@ -312,20 +317,17 @@ function setFocus()
 
   .select-dropdown-item
     width: 100%
-    min-height: 2rem
+    min-height: 2.5rem
     padding-inline: 1rem
-    padding-block: .25rem
     cursor: pointer
     display: flex
     align-items: center
     justify-content: flex-start
+    gap: 1rem
     color: inherit
     background: transparent
     border: none
     font-size: inherit
-
-    //TODO: Implement disabled styling @Alyx
-
 
     &::before
       content: ""
@@ -337,20 +339,69 @@ function setFocus()
       border-radius: inherit
       background-color: currentColor
       opacity: 0
+      pointer-events: none
+      transition: opacity 50ms ease-in-out
+
+    &[data-indicator-style="side"]::after
+      content: ""
+      position: absolute
+      top: .5rem
+      bottom: .5rem
+      left: 0
+      width: 0
+      border-radius: 0 1rem 1rem 0
+      background-color: var(--color-primary)
+      pointer-events: none
+      transition: width 100ms ease-in-out
+
+
+
+    &:focus
+      outline: none
+      color: var(--color-text)
+
+      &::before
+        opacity: .05
+
+
 
     &:hover
       color: var(--color-text)
 
       &::before
-        opacity: .1
-    
-    &[data-disabled]
-        color: grey
-        cursor: not-allowed
-    &[data-selected="true"]
-      color: green
-      font-weight: bold
+        opacity: .075 !important
 
+
+    
+    &[data-selected="true"]
+      color: var(--color-text)
+
+      &::before
+        opacity: .05
+
+      &::after
+        width: 3px
+
+
+      
+    &:disabled
+      color: var(--color-text-soft-disabled)
+      cursor: initial
+
+      &::before
+        opacity: 0 !important
+
+      > .iod-toggle
+        --local-color-off: var(--color-border)
+
+
+    
+    > .iod-toggle
+      padding: 0 !important
+      margin: 0 !important
+      min-height: 0 !important
+      pointer-events: none
+      --local-color-off: var(--color-border-focused)
 
     > span
       position: relative
