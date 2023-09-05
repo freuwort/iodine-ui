@@ -302,7 +302,7 @@
                             value: 'a'
                         },{
                             text: 'AAAAAaa aAAAa AAAAaaa AAAaaAA  AAaaaaaaA AAAaaa AAAaA AAAAAaa aAAAa AAAAaaa AAAaaAA  AAaaaaaaA AAAaaa AAAaA AAAAAaa aAAAa AAAAaaa AAAaaAA  AAaaaaaaA AAAaaa AAAaA AAAAAaa aAAAa AAAAaaa AAAaaAA  AAaaaaaaA AAAaaa AAAaA AAAAAaa aAAAa AAAAaaa AAAaaAA  AAaaaaaaA AAAaaa AAAaA AAAAAaa aAAAa AAAAaaa AAAaaAA  AAaaaaaaA AAAaaa AAAaA',
-                            value: 'a'
+                            value: 'aa'
                         }]"/>
                     </div>
                 </div>
