@@ -41,7 +41,7 @@
           :disabled="option.disabled"
           :data-selected="selectedOptions.includes(option)"
           :data-indicator-style="indicatorStyle"
-          :data-highlighted="highlightedOption === option"
+          :data-highlighted="highlightedOption?.value === option.value"
           @mousedown="!option.disabled && change(option)"
           @blur="checkOptionCloseOnBlur"
           @mouseenter="highlightOption(option)"
@@ -60,7 +60,7 @@ export type SelectInputTypes = InputTypes_ | InputTypes_[];
 </script>
 
 <script setup lang="ts">
-import { onMounted, getCurrentInstance, Ref, PropType, ref, watch, computed, nextTick } from "vue";
+import { onMounted, getCurrentInstance, Ref, PropType, ref, watch, computed, nextTick, isProxy, toRaw } from "vue";
 import {getEmptyRefDOMBounds, useElementBounding} from './helpers/refDOMBounds';
 
 import PopOver from "./partials/PopOver.vue";
@@ -132,6 +132,7 @@ const highlightedOption = ref<Option | null>(null);
 
 function highlightOption(option: Option)
 {
+
   if(option.disabled)
   {
     highlightedOption.value = null;
@@ -173,68 +174,69 @@ function handleKeyDown(event: KeyboardEvent)
   if(!keys.includes(event.key)) { return; }
 
   event.preventDefault();
+  let options = props.options;
+  if (isProxy(options)){
+    options = toRaw(options);
+  }
+
+  let index = -1;
+  if([ "ArrowDown", "ArrowUp"].includes(event.key))
+  {
+    if(highlightedOption.value != null)
+    {
+      index = options.indexOf(toRaw(highlightedOption.value));
+    }
+  }
+  const nextIndex = () => {
+    index = (index + 1) % options.length
+  }
+  const prevIndex = () => {
+    // x + (n-1) % n is a trick to substract 1 and wrap around to the end of the array
+    index = (index + options.length - 1) % options.length
+  }
 
   switch(event.key)
   {
     case "ArrowDown":
-      if(highlightedOption.value == null)
+      if(index === -1)
       {
-        let index = 0;
-        const nextIndex = () => {
-          index = (index + 1) % props.options.length
-        }
-        for(let i = 0;i < props.options.length + 1 && props.options[index].disabled; i++)
+        index = 0;
+        for(let i = 0;i < options.length + 1 && options[index].disabled; i++)
         {
           nextIndex();
         }
-        highlightOption(highlightedOption.value = props.options[index]).scroll();
+        highlightOption(highlightedOption.value = options[index]).scroll();
       }
       else
       {
-        let index = props.options.indexOf(highlightedOption.value);
-
-        const nextIndex = () => {
-          index = (index + 1) % props.options.length
-        }
-
         nextIndex();
-        for(let i = 0;i < props.options.length + 1 && props.options[index].disabled; i++)
+        for(let i = 0;i < options.length + 1 && options[index].disabled; i++)
         {
           nextIndex();
         }
 
-        highlightOption(props.options[index]).scroll();
+        highlightOption(options[index]).scroll();
       }
       break;
     case "ArrowUp":
-      if(highlightedOption.value == null)
+      if(index === -1)
       {
-        let index = props.options.length - 1;
-        const nextIndex = () => {
-          // x + (n-1) % n is a trick to substract 1 and wrap around to the end of the array
-          index = (index + props.options.length - 1) % props.options.length
-        }
-        for(let i = 0;i < props.options.length + 1 && props.options[index].disabled; i++)
+        index = options.length - 1;
+        for(let i = 0;i < options.length + 1 && options[index].disabled; i++)
         {
-          nextIndex();
+          prevIndex();
         }
-        highlightOption(props.options[props.options.length - 1]).scroll();
+        highlightOption(options[options.length - 1]).scroll();
       }
       else
       {
-        let index = props.options.indexOf(highlightedOption.value);
-        const nextIndex = () => {
-          // x + (n-1) % n is a trick to substract 1 and wrap around to the end of the array
-          index = (index + props.options.length - 1) % props.options.length
-        }
-
-        nextIndex();
-        for(let i = 0;i < props.options.length + 1 && props.options[index].disabled; i++)
+        prevIndex();
+        for(let i = 0;i < options.length + 1 && options[index].disabled; i++)
         {
-          nextIndex();
+          prevIndex();
         }
 
-        highlightOption(props.options[index]).scroll()
+        highlightOption(options[index]).scroll()
       }
       break;
     case "Enter":
