@@ -34,7 +34,7 @@
             </select>
 
             <div class="sub-layout">
-                <input type="text" :value="fullHexColorString">
+                <input type="text" :value="computedColor">
                 
                 <input type="number" class="alpha" :value="Math.round(color.alpha * 100)" min="0" max="100">
             </div>
@@ -102,6 +102,22 @@
     const outputMode = ref('hex' as 'hex'|'rgb'|'hsl'|'hsb')
     const swatchPalette = ref(null as string|null)
 
+    const computedColor = computed((): string => {
+        switch (outputMode.value) {
+            case 'hex':
+                return `#${fullHexColorString.value}`
+            case 'rgb':
+                var rgb = hsb2rgb(color.value);
+                return `rgb(${Math.round(rgb.red * 255)}, ${Math.round(rgb.green * 255)}, ${Math.round(rgb.blue * 255)})`
+            case 'hsl':
+                var hsl = hsb2hsl(color.value);
+                return `hsl(${Math.round(hsl.hue * 360)}, ${Math.round(hsl.saturation * 100)}%, ${Math.round(hsl.lightness * 100)}%)`
+            case 'hsb':
+                return `hsb(${Math.round(color.value.hue * 360)}, ${Math.round(color.value.saturation * 100)}%, ${Math.round(color.value.brightness * 100)}%)`
+            default:
+                return ""
+        }
+    })
 
 
     const hueColorString = computed((): string => {
@@ -128,7 +144,7 @@
 
 
 
-    const hsb2hsl = (color: HSBColor): HSLColor => {
+    function hsb2hsl(color: HSBColor): HSLColor {
         let { hue, saturation, brightness } = color
         
         let lightness = (2 - saturation) * brightness / 2
@@ -157,7 +173,7 @@
         }
     }
 
-    const hsb2rgb = (color: HSBColor): RGBColor => {
+    function hsb2rgb (color: HSBColor): RGBColor {
         let { hue, saturation, brightness } = color
 
         let r, g, b
@@ -221,7 +237,7 @@
         }
     }
 
-    const rgb2hex = (color: RGBColor): HexColor => {
+    function rgb2hex (color: RGBColor): HexColor  {
         let { red, green, blue } = color
         
         let r = Math.round(red * 255).toString(16).padStart(2, '0')
