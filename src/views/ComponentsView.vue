@@ -213,6 +213,28 @@
                         <IodineInput class="flex-1" type="number" label="Label" border disabled />
                     </div>
                 </div>
+
+                <div class="group">
+                    <h2>Selects</h2>
+                    <div class="flex gap-1 v-center">
+                        <IodineSelect class="flex-1" :options="selectOptions" label="Label" required />
+                        <IodineSelect class="flex-1" :options="selectOptions" label="Label" required border />
+                        <IodineSelect class="flex-1" :options="selectOptions" label="Label" required disabled />
+                        <IodineSelect class="flex-1" :options="selectOptions" label="Label" required border disabled />
+                    </div>
+                    <div class="flex gap-1 v-center">
+                        <IodineSelect class="flex-1" :options="selectOptions" label="Label" />
+                        <IodineSelect class="flex-1" :options="selectOptions" label="Label" border />
+                        <IodineSelect class="flex-1" :options="selectOptions" label="Label" indicatorStyle="box" />
+                        <IodineSelect class="flex-1" :options="selectOptions" label="Label" indicatorStyle="box" border />
+                    </div>
+                    <div class="flex gap-1 v-center">
+                        <IodineSelect class="flex-1" :options="selectOptions" label="Label" multiple required :max-size="'100px'" />
+                        <IodineSelect class="flex-1" :options="selectOptions" label="Label" multiple required border />
+                        <IodineSelect class="flex-1" :options="selectOptions" label="Label" multiple required indicatorStyle="box" />
+                        <IodineSelect class="flex-1" :options="selectOptions" label="Label" multiple required indicatorStyle="box" border />
+                    </div>
+                </div>
     
                 <div class="group">
                     <h2>Toggles</h2>
@@ -248,12 +270,40 @@
                 <div class="group">
                     <h2>Picker</h2>
                     <div class="flex gap-1">
-                        <IodineIconpicker :icons="icons">
+                        <!-- <IodineIconpicker :icons="icons">
                             <IodineButton type="button" label="Open Iconpicker"/>
-                        </IodineIconpicker>
+                        </IodineIconpicker> -->
                         <IodineColorpicker :swatch-palettes="swatchPalettes">
                             <IodineButton type="button" label="Open Colopicker"/>
                         </IodineColorpicker>
+                    </div>
+                </div>
+                <div class="group">
+                    <h2>Lynn's Playground</h2>
+                    <div class="flex gap-1">
+                        <select style="width:100px">
+                            <option value="a">AAaaaa</option>
+                            <option value="a">AAaaaa</option>
+                            <option value="a">AAaaaa</option>
+                            <option value="a">AAaaaa</option>
+                            <option value="a">AAaaaa</option>
+                            <option value="a">AAaaaa</option>
+                            <option value="a">AAaaaa</option>
+                            <option value="a">AAaaaa</option>
+                            <option value="a">AAaaaa</option>
+                            <option value="a">AAaaaa</option>
+                            <option value="a">AAaaaa</option>
+                            <option value="a">AAaaaa</option>
+                            <option value="a">AAaaaa</option>
+                        </select>
+                        <IodineSelect style="height: 2.5rem" label="Choose an 'AAaA'" :options="[
+                        {
+                            text: 'AAAAAaa aAAAa AAAAaaa AAAaaAA  AAaaaaaaA AAAaaa AAAaA AAAAAaa aAAAa AAAAaaa AAAaaAA  AAaaaaaaA AAAaaa AAAaA AAAAAaa aAAAa AAAAaaa AAAaaAA  AAaaaaaaA AAAaaa AAAaA AAAAAaa aAAAa AAAAaaa AAAaaAA  AAaaaaaaA AAAaaa AAAaA AAAAAaa aAAAa AAAAaaa AAAaaAA  AAaaaaaaA AAAaaa AAAaA AAAAAaa aAAAa AAAAaaa AAAaaAA  AAaaaaaaA AAAaaa AAAaA',
+                            value: 'a'
+                        },{
+                            text: 'AAAAAaa aAAAa AAAAaaa AAAaaAA  AAaaaaaaA AAAaaa AAAaA AAAAAaa aAAAa AAAAaaa AAAaaAA  AAaaaaaaA AAAaaa AAAaA AAAAAaa aAAAa AAAAaaa AAAaaAA  AAaaaaaaA AAAaaa AAAaA AAAAAaa aAAAa AAAAaaa AAAaaAA  AAaaaaaaA AAAaaa AAAaA AAAAAaa aAAAa AAAAaaa AAAaaAA  AAaaaaaaA AAAaaa AAAaA AAAAAaa aAAAa AAAAaaa AAAaaAA  AAaaaaaaA AAAaaa AAAaA',
+                            value: 'aa'
+                        }]"/>
                     </div>
                 </div>
             </div>
@@ -274,6 +324,8 @@
     import IodineColorpicker from '@/components/library/IodineColorpicker.vue'
     import IodineIconpicker from '@/components/library/IodineIconpicker.vue'
 
+    import IodineSelect from '@/components/library/IodineSelect.vue'
+
     import HeroSection from '@/components/HeroSection.vue'
     
     import swatchPalettes from '@/components/data/colors/FlatUiColors'
@@ -283,6 +335,19 @@
 
     const popup = ref({} as typeof IodinePopup)
     const bool = ref(false)
+    const selectOptions = ref([
+        { text: 'No Option', value: null },
+        { text: 'Option 1', value: 1, disabled: true},
+        { text: 'Option 2', value: 2 },
+        { text: 'Option 3', value: 3 },
+        { text: 'Option 4', value: 4 },
+        { text: 'Option 5', value: 5 },
+        { text: 'Option 6', value: 6 },
+        { text: 'Option 7', value: 7 },
+        { text: 'Option 8', value: 8 },
+        { text: 'Option 9', value: 9 },
+        { text: 'Totally different option', value: 'totally different option' },
+    ])
 </script>
 
 <style lang="sass" scoped>
