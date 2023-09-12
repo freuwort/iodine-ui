@@ -40,7 +40,7 @@
             "/>
 
             <div class="sub-layout">
-                <IodineInput type="text" :modelValue="computedColor" />
+                <IodineInput type="text" v-model="computedColor" @keydown="recalculateColor"/>
 
                 <IodineInput type="number" class="alpha" v-model="computedAlpha" min="0" max="100" />
             </div>
@@ -110,23 +110,89 @@ const color = ref({ hue: 0, saturation: 1, brightness: 1, alpha: 1 } as HSBColor
 const outputMode = ref('hex' as 'hex' | 'rgb' | 'hsl' | 'hsb')
 const swatchPalette = ref(null as string | null)
 const outputSelector = ref<typeof IodineSelect | null>(null)
+let typedColor = "";
 
-const computedColor = computed((): string => {
-    switch (outputMode.value) {
-        case 'hex':
-            return `#${fullHexColorString.value}`
-        case 'rgb':
-            var rgb = hsb2rgb(color.value);
-            return `rgb(${Math.round(rgb.red * 255)}, ${Math.round(rgb.green * 255)}, ${Math.round(rgb.blue * 255)})`
-        case 'hsl':
-            var hsl = hsb2hsl(color.value);
-            return `hsl(${Math.round(hsl.hue * 360)}, ${Math.round(hsl.saturation * 100)}%, ${Math.round(hsl.lightness * 100)}%)`
-        case 'hsb':
-            return `hsb(${Math.round(color.value.hue * 360)}, ${Math.round(color.value.saturation * 100)}%, ${Math.round(color.value.brightness * 100)}%)`
-        default:
-            return ""
+
+const computedColor = computed({
+    get(){
+        switch (outputMode.value) {
+            case 'hex':
+                return `#${fullHexColorString.value}`
+            case 'rgb':
+                var rgb = hsb2rgb(color.value);
+                return `${Math.round(rgb.red * 255)}, ${Math.round(rgb.green * 255)}, ${Math.round(rgb.blue * 255)}`
+            case 'hsl':
+                var hsl = hsb2hsl(color.value);
+                return `${Math.round(hsl.hue * 360)}, ${Math.round(hsl.saturation * 100)}%, ${Math.round(hsl.lightness * 100)}%`
+            case 'hsb':
+                return `${Math.round(color.value.hue * 360)}, ${Math.round(color.value.saturation * 100)}%, ${Math.round(color.value.brightness * 100)}%`
+            default:
+                return ""
+        }
+    },
+    set(value) {
+        typedColor = value;
     }
 })
+
+function recalculateColor(event: KeyboardEvent) {
+    if (event.key != 'Enter') return
+
+    switch (outputMode.value) {
+        case 'hex' :{
+            let {r, g, b} = hexStringToRGB(typedColor)
+
+            let temp = rgb2hsb({ red: r / 255, green: g / 255, blue: b / 255, alpha: color.value.alpha })
+
+            if([temp.hue, temp.saturation, temp.brightness].some(e => isNaN(e))) {
+                return
+            }
+
+            color.value = temp
+            break
+        }
+        case 'rgb': {
+            let {r, g, b} = rgbStringToRGB(typedColor)
+            let temp = rgb2hsb({ red: r / 255, green: g / 255, blue: b / 255, alpha: color.value.alpha })
+
+            if([temp.hue, temp.saturation, temp.brightness].some(e => isNaN(e))) {
+                return
+            }
+
+            color.value = temp
+            break
+        }
+        case 'hsl': {
+            let tmpColor = typedColor
+            tmpColor = tmpColor.replaceAll('hsb(', '').replaceAll(')', '').replaceAll(' ', '').replaceAll('%', '')
+            let [h, s, l] = tmpColor.split(',').map(e => Number(e))
+            let tempRGB = hsl2rgb({ hue: h / 360, saturation: s / 100, lightness: l / 100, alpha: color.value.alpha })
+            let temp = rgb2hsb({ red: tempRGB.red / 255, green: tempRGB.green / 255, blue: tempRGB.blue / 255, alpha: color.value.alpha })
+
+            if([temp.hue, temp.saturation, temp.brightness].some(e => isNaN(e))) {
+                return
+            }
+
+            color.value = temp
+
+            break
+        }
+        case 'hsb': {
+            let tmpColor = typedColor
+            tmpColor = tmpColor.replaceAll('hsb(', '').replaceAll(')', '').replaceAll(' ', '').replaceAll('%', '')
+            let [h, s, b] = tmpColor.split(',').map(e => Number(e))
+            let temp = { hue: h / 360, saturation: s / 100, brightness: b / 100, alpha: color.value.alpha }
+
+            if([temp.hue, temp.saturation, temp.brightness].some(e => isNaN(e))) {
+                return
+            }
+
+            color.value = temp
+
+            break
+        }
+    }
+}
 
 const computedAlpha = computed({
     get() {
@@ -138,6 +204,23 @@ const computedAlpha = computed({
 })
 
 
+
+function rgbStringToRGB(rgb: string): { r: number, g: number, b: number } {
+
+    rgb = rgb.replaceAll('rgb(', '').replaceAll(')', '').replaceAll(' ', '')
+    var [r, g, b] = rgb.split(',').map(e => Number(e))
+    return { r, g, b }
+}
+function hexStringToRGB(hex: string): { r: number, g: number, b: number } {
+    hex = hex.replaceAll('#', '')
+    if (hex.length == 3) {
+        hex = hex.split('').map(e => e + e).join('')
+    }
+    var r = Number(`0x${hex.slice(0, 2)}`)
+    var g = Number(`0x${hex.slice(2, 4)}`)
+    var b = Number(`0x${hex.slice(4, 6)}`)
+    return { r, g, b }
+}
 
 
 const hueColorString = computed((): string => {
@@ -163,6 +246,87 @@ const selectedSwatchPalette = computed((): SwatchPalette => {
 })
 
 
+function rgb2hsb(color: RGBColor): HSBColor
+{
+    let { red, green, blue } = color
+    var MAX = Math.max(red, green, blue)
+    var MIN = Math.min(red, green, blue)
+
+    let H = 0
+    let S = 0
+    let B = MAX
+
+    switch(true)
+    {
+        case MAX == MIN:
+            H = 0
+            break
+        case MAX == red:
+            H = (green - blue) / (MAX - MIN)
+            break
+        case MAX == green:
+            H = 2 + (blue - red) / (MAX - MIN)
+            break
+        case MAX == blue:
+            H = 4 + (red - green) / (MAX - MIN)
+            break
+    }
+
+    H = Math.min(H * 60, 360)
+    if (H < 0) {
+        H += 360
+    }
+
+    S = (MAX==MIN) ? 0 : (MAX-MIN) / MAX
+    if(MAX == 0) {
+        S = 0
+    }
+
+    console.log({
+        hue: H / 360,
+        saturation: S,
+        brightness: B,
+        alpha: color.alpha,
+    })
+
+    return {
+        hue: H / 360,
+        saturation: S,
+        brightness: B,
+        alpha: color.alpha,
+    }
+
+}
+
+
+function hsl2rgb(hsl: HSLColor) :RGBColor {
+    let t1, t2;
+    let r, g, b;
+    let { hue, saturation, lightness } = hsl
+    hue = hue / 60.0;
+    if (lightness <= 0.5)
+    {
+        t2 = lightness * (saturation + 1);
+    }
+    else
+    {
+        t2 = lightness + saturation - (lightness * saturation);
+    }
+    t1 = lightness * 2 - t2;
+    r = HueToRgb(t1, t2, hue + 2) * 255;
+    g = HueToRgb(t1, t2, hue) * 255;
+    b = HueToRgb(t1, t2, hue - 2) * 255;
+    return {red: r, green: g, blue: b, alpha: hsl.alpha};
+}
+
+function HueToRgb(t1: number, t2: number, hue: number) {
+    if (hue < 0) hue += 6;
+    if (hue >= 6) hue -= 6;
+    if (hue < 1) return (t2 - t1) * hue + t1;
+    else if (hue < 3) return t2;
+    else if (hue < 4) return (t2 - t1) * (4 - hue) + t1;
+    else return t1;
+}
 
 function hsb2hsl(color: HSBColor): HSLColor
 {
