@@ -251,7 +251,7 @@ function nudgeColor(amount: number){
     }
     nextTick(() => {
         //FIXME: put this into the iodine input component
-        let input = (colorOutput.value?.$refs.input as HTMLInputElement)
+        let input = colorOutput.value!.$refs.input
         let newCaret = caret + (computedColor.value.length - lengthOrig)
         input.selectionStart = newCaret
         input.selectionEnd = newCaret
