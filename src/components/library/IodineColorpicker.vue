@@ -40,9 +40,9 @@
             "/>
 
             <div class="sub-layout">
-                <IodineInput type="text" :modelValue="fullHexColorString" />
+                <IodineInput type="text" :modelValue="computedColor" />
 
-                <IodineInput type="number" class="alpha" :modelValue="Math.round(color.alpha * 100)" min="0" max="100" />
+                <IodineInput type="number" class="alpha" v-model="computedAlpha" min="0" max="100" />
             </div>
         </div>
 
@@ -111,7 +111,32 @@ const outputMode = ref('hex' as 'hex' | 'rgb' | 'hsl' | 'hsb')
 const swatchPalette = ref(null as string | null)
 const outputSelector = ref<typeof IodineSelect | null>(null)
 
-outputSelector.value?.value;
+const computedColor = computed((): string => {
+    switch (outputMode.value) {
+        case 'hex':
+            return `#${fullHexColorString.value}`
+        case 'rgb':
+            var rgb = hsb2rgb(color.value);
+            return `rgb(${Math.round(rgb.red * 255)}, ${Math.round(rgb.green * 255)}, ${Math.round(rgb.blue * 255)})`
+        case 'hsl':
+            var hsl = hsb2hsl(color.value);
+            return `hsl(${Math.round(hsl.hue * 360)}, ${Math.round(hsl.saturation * 100)}%, ${Math.round(hsl.lightness * 100)}%)`
+        case 'hsb':
+            return `hsb(${Math.round(color.value.hue * 360)}, ${Math.round(color.value.saturation * 100)}%, ${Math.round(color.value.brightness * 100)}%)`
+        default:
+            return ""
+    }
+})
+
+const computedAlpha = computed({
+    get() {
+        return Math.round(color.value.alpha * 100)
+    },
+    set(newValue) {
+        color.value.alpha = newValue / 100
+    }
+})
+
 
 
 
