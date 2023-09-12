@@ -36,10 +36,24 @@
     const container = ref({} as HTMLElement)
     const isDragging = ref(false)
 
-    const handleMouseDown = () => {
+    const handleMouseDown = (event: MouseEvent) => {
         isDragging.value = true
         window.addEventListener('mousemove', handleMouseMove)
         window.addEventListener('mouseup', handleMouseUp)
+
+        let rect = container.value.getBoundingClientRect()
+
+        // Calculate the position of the mouse relative to the container respecting the padding
+        let x = (event.clientX - rect.left - props.padding) / (rect.width - props.padding * 2)
+        let y = (event.clientY - rect.top - props.padding) / (rect.height - props.padding * 2)
+
+        position.value = {
+            x: Math.max(0, Math.min(1, x)),
+            y: Math.max(0, Math.min(1, y)),
+        }
+
+        emits('update:x', position.value.x)
+        emits('update:y', position.value.y)
     }
 
     const handleMouseMove = (event: MouseEvent) => {
