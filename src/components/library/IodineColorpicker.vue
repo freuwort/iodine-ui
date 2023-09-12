@@ -40,7 +40,7 @@
             "/>
 
             <div class="sub-layout">
-                <IodineInput type="text" v-model="computedColor" @keydown="recalculateColor"/>
+                <IodineInput type="text" ref="colorOutput" v-model="computedColor" @keydown="keyDown"/>
 
                 <IodineInput type="number" class="alpha" v-model="computedAlpha" min="0" max="100" />
             </div>
@@ -92,7 +92,7 @@ interface SwatchPalette {
 </script>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, nextTick } from 'vue'
 
 import AreaSlider from './partials/AreaSlider.vue'
 import IodineSelect from './IodineSelect.vue'
@@ -110,6 +110,7 @@ const color = ref({ hue: 0, saturation: 1, brightness: 1, alpha: 1 } as HSBColor
 const outputMode = ref('hex' as 'hex' | 'rgb' | 'hsl' | 'hsb')
 const swatchPalette = ref(null as string | null)
 const outputSelector = ref<typeof IodineSelect | null>(null)
+const colorOutput = ref<typeof IodineInput | null>(null)
 let typedColor = "";
 
 
@@ -135,9 +136,128 @@ const computedColor = computed({
     }
 })
 
-function recalculateColor(event: KeyboardEvent) {
-    if (event.key != 'Enter') return
+function keyDown(event: KeyboardEvent) {
 
+
+    if (event.key == 'Enter') {
+        recalculateColor()
+        event.preventDefault();
+        return
+    }
+
+    typedColor = computedColor.value
+
+
+    if(event.key == "ArrowUp")
+    {
+        nudgeColor(+1);
+        event.preventDefault();
+    }
+    if(event.key == "ArrowDown")
+    {
+        nudgeColor(-1);
+        event.preventDefault();
+    }
+}
+
+
+function nudgeColor(amount: number){
+    
+    //FIXME: put this into the iodine input component
+    let caret = (colorOutput.value?.$refs.input as HTMLInputElement).selectionStart ?? typedColor.length-1
+
+    let lengthOrig = typedColor.length
+    console.log(caret, typedColor, typedColor.length)
+    let pre = typedColor.slice(0, caret)
+    let post = typedColor.slice(caret)
+
+    pre = pre.replaceAll(/[a-zG-Z %]+/g, "").replaceAll(' ', '')
+    post = post.replaceAll(/[a-zG-Z %]+/g, "").replaceAll(' ', '')
+
+
+    const nudge = function (number:number, amount:number, min:number, max:number){
+        return Math.min(Math.max(number + amount, min), max)
+    }
+
+    switch(outputMode.value)
+    {
+        case 'rgb': {
+            let {r, g, b} = rgbStringToRGB(typedColor)
+            let commas = (pre.split(",").length - 1)
+            if(commas == 0)
+            {
+                r = nudge(r, amount, 0, 255)
+            }
+            else if(commas == 1)
+            {
+                g = nudge(g, amount, 0, 255)
+            }
+            else if(commas == 2)
+            {
+                b = nudge(b, amount, 0, 255)
+            }
+            typedColor = `rgb(${r}, ${g}, ${b})`
+            recalculateColor()
+
+            break
+        }
+        case 'hex': {
+            let RGB = hexStringToRGB(typedColor)
+            if(pre.length <= 3)
+            {
+                RGB.r = nudge(RGB.r, amount, 0, 255)
+            }
+            else if(pre.length <= 5)
+            {
+                RGB.g = nudge(RGB.g, amount, 0, 255)
+            }
+            else if(pre.length <= 7)
+            {
+                RGB.b = nudge(RGB.b, amount, 0, 255)
+            }
+            
+            typedColor = `#${rgb2hex({
+                red: RGB.r / 255,
+                green: RGB.g / 255,
+                blue: RGB.b / 255,
+                alpha: color.value.alpha
+            }).hex}`
+            
+            recalculateColor()
+            break
+
+        }
+        case 'hsl' :
+        case 'hsb': {
+            let {r, g, b} = rgbStringToRGB(pre + post)
+            let commas = (pre.split(",").length - 1)
+            if(commas == 0)
+            {
+                r = nudge(r, amount, 0, 360)
+            }
+            else if(commas == 1)
+            {
+                g = nudge(g, amount, 0, 100)
+            }
+            else if(commas == 2)
+            {
+                b = nudge(b, amount, 0, 100)
+            }
+            typedColor = `${r}, ${g}%, ${b}%`
+            console.log(typedColor, pre + post)
+            recalculateColor()
+            break
+        }
+    }
+    nextTick(() => {
+        let input = (colorOutput.value?.$refs.input as HTMLInputElement)
+        input.selectionStart = caret + (computedColor.value.length - lengthOrig)
+        input.selectionEnd = caret + (computedColor.value.length - lengthOrig)
+    })
+    return
+}
+
+function recalculateColor() {
     switch (outputMode.value) {
         case 'hex' :{
             let {r, g, b} = hexStringToRGB(typedColor)
@@ -164,9 +284,9 @@ function recalculateColor(event: KeyboardEvent) {
         }
         case 'hsl': {
             let tmpColor = typedColor
-            tmpColor = tmpColor.replaceAll('hsb(', '').replaceAll(')', '').replaceAll(' ', '').replaceAll('%', '')
+            tmpColor = tmpColor.replaceAll('hsl(', '').replaceAll(')', '').replaceAll(' ', '').replaceAll('%', '')
             let [h, s, l] = tmpColor.split(',').map(e => Number(e))
-            let tempRGB = hsl2rgb({ hue: h / 360, saturation: s / 100, lightness: l / 100, alpha: color.value.alpha })
+            let tempRGB = hsl2rgb({ hue: h, saturation: s / 100, lightness: l / 100, alpha: color.value.alpha })
             let temp = rgb2hsb({ red: tempRGB.red / 255, green: tempRGB.green / 255, blue: tempRGB.blue / 255, alpha: color.value.alpha })
 
             if([temp.hue, temp.saturation, temp.brightness].some(e => isNaN(e))) {
