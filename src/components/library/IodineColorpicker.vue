@@ -52,7 +52,7 @@
             "/>
             <div class="grid">
                 <div class="swatch" v-for="swatch in selectedSwatchPalette.colors" :key="swatch.hex"
-                    :style="`background: ${swatch.hex};`"></div>
+                    :style="`background: ${swatch.hex};`" @click="changeColorHEX(swatch.hex)"></div>
             </div>
         </div>
     </div>
@@ -160,11 +160,22 @@ function keyDown(event: KeyboardEvent) {
     }
 }
 
+function changeColorHEX(newColor: string) {
+    let {r, g, b} = hexStringToRGB(newColor)
+
+    let temp = rgb2hsb({ red: r / 255, green: g / 255, blue: b / 255, alpha: color.value.alpha })
+
+    if([temp.hue, temp.saturation, temp.brightness].some(e => isNaN(e))) {
+        return
+    }
+
+    color.value = temp
+}
 
 function nudgeColor(amount: number){
     
     //FIXME: put this into the iodine input component
-    let caret = (colorOutput.value?.$refs.input as HTMLInputElement).selectionStart ?? typedColor.length-1
+    let caret = colorOutput.value!.$refs.input.selectionStart
 
     let lengthOrig = typedColor.length
     console.log(caret, typedColor, typedColor.length)
