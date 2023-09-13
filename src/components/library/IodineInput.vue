@@ -57,6 +57,7 @@
                             @keydown.esc="inputEvent('esc', $event)"
                             @keydown.enter="inputEvent('enter', $event)"
                             @keydown.space="inputEvent('space', $event)"
+                            @mousedown="handleMouseDown($event)"
                         ></component>
 
                         <div class="placeholder" v-if="placeholder">{{placeholder}}</div>
@@ -419,6 +420,55 @@
             case 'focus': isFocused.value = true; break;
             case 'blur': isFocused.value = false; validateOnBlur(); break;
         }
+    }
+
+    let dragStartX = 0
+    function handleMouseDown (event: MouseEvent): void {
+
+        if(props.type !== 'number') return;
+
+        window.addEventListener('mousemove', handleDragMouseMove)
+        window.addEventListener('mouseup', handleDragMouseUp)
+
+        dragStartX = event.clientX
+
+    }
+    function handleDragMouseUp (event: MouseEvent): void {
+
+        window.removeEventListener('mousemove', handleDragMouseMove)
+        window.removeEventListener('mouseup', handleDragMouseUp)
+
+    }
+    function handleDragMouseMove (event: MouseEvent): void {
+        let currentX = event.clientX
+
+        let deltaX = currentX - dragStartX
+
+        let threshold = 10
+
+        while(deltaX > threshold) {
+            internalValue.value = Number(internalValue.value) + 1
+            dragStartX += threshold
+            deltaX = currentX - dragStartX
+        }
+        while(deltaX < -threshold) {
+            internalValue.value = Number(internalValue.value) - 1
+            dragStartX -= threshold
+            deltaX = currentX - dragStartX
+        }
+
+        if(max__.value)
+        {
+            if(Number(internalValue.value) > max__.value) internalValue.value = max__.value
+        }
+
+        if(min__.value || min__.value === 0)
+        {
+            if(Number(internalValue.value) < min__.value) internalValue.value = min__.value
+        }
+
+        emitUpdate()
+
     }
 
     function shouldBounceEvent (event: Event): boolean {
