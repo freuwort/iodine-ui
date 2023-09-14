@@ -40,7 +40,7 @@
             "/>
 
             <div class="sub-layout">
-                <IodineInput type="text" ref="colorOutput" v-model="computedColor" @keydown="keyDown"/>
+                <IodineInput type="text" ref="colorOutput" v-model="computedColor" @keydown="keyDown" @mousedown="handleColorCodeMouseDown"/>
 
                 <IodineInput type="number" class="alpha" v-model="computedAlpha" min="0" max="100" />
             </div>
@@ -97,6 +97,7 @@ import { ref, computed, nextTick } from 'vue'
 import AreaSlider from './partials/AreaSlider.vue'
 import IodineSelect from './IodineSelect.vue'
 import IodineInput from './IodineInput.vue'
+import { initiateDragListening } from './helpers/dragListener';
 
 
 
@@ -172,13 +173,35 @@ function changeColorHEX(newColor: string) {
     color.value = temp
 }
 
+let colorNudgingIsDragging = false;
+let colorNudgingCaret = 0;
+function handleColorCodeMouseDown(event: MouseEvent){
+    typedColor = computedColor.value
+    colorNudgingIsDragging = true;
+    colorNudgingCaret = colorOutput.value!.input.selectionStart
+    initiateDragListening({
+        event: event,
+        callback: (args)=>{
+            nudgeColor(-args.stepY)
+        },
+        endCallback: ()=>{
+            colorNudgingIsDragging = false;
+        },
+        onlyCallbackOnStepY: true,
+        stepSizeY: 10,
+    })
+
+}
+
 function nudgeColor(amount: number){
     
-    //FIXME: put this into the iodine input component
-    let caret = colorOutput.value!.$refs.input.selectionStart
+    let caret = colorOutput.value!.input.selectionStart
+    if(colorNudgingIsDragging)
+    {
+        caret = colorNudgingCaret
+    }
 
     let lengthOrig = typedColor.length
-    console.log(caret, typedColor, typedColor.length)
     let pre = typedColor.slice(0, caret)
     let post = typedColor.slice(caret)
 
@@ -255,15 +278,14 @@ function nudgeColor(amount: number){
                 b = nudge(b, amount, 0, 100)
             }
             typedColor = `${r}, ${g}%, ${b}%`
-            console.log(typedColor, pre + post)
             recalculateColor()
             break
         }
     }
     nextTick(() => {
-        //FIXME: put this into the iodine input component
-        let input = colorOutput.value!.$refs.input
+        let input = colorOutput.value!.input
         let newCaret = caret + (computedColor.value.length - lengthOrig)
+        colorNudgingCaret = newCaret
         input.selectionStart = newCaret
         input.selectionEnd = newCaret
     })
@@ -415,12 +437,6 @@ function rgb2hsb(color: RGBColor): HSBColor
         S = 0
     }
 
-    console.log({
-        hue: H / 360,
-        saturation: S,
-        brightness: B,
-        alpha: color.alpha,
-    })
 
     return {
         hue: H / 360,

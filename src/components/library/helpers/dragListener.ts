@@ -11,10 +11,13 @@ export type CallbackFunction = (arg: CallbackArgument) => void
 
 export type InitialArguments = {
     event: MouseEvent,
-    callback: CallbackFunction
+    callback: CallbackFunction,
+    endCallback?: () => void,
     stepSizeX?: number,
     stepSizeY?: number,
     onlyCallbackOnStep?: boolean,
+    onlyCallbackOnStepX?: boolean,
+    onlyCallbackOnStepY?: boolean
 }
 
 export function initiateDragListening (args: InitialArguments): void {
@@ -46,6 +49,8 @@ export function initiateDragListening (args: InitialArguments): void {
             if(stepY > 0) stepY = Math.floor(stepY / args.stepSizeY)
         }
         if(args.onlyCallbackOnStep && stepX === 0 && stepY === 0) return
+        if(args.onlyCallbackOnStepX && stepX === 0) return
+        if(args.onlyCallbackOnStepY && stepY === 0) return
 
 
         args.callback({
@@ -61,6 +66,7 @@ export function initiateDragListening (args: InitialArguments): void {
     const handleDragMouseUp = (event: MouseEvent): void => {
         window.removeEventListener('mousemove', handleDragMouseMove)
         window.removeEventListener('mouseup', handleDragMouseUp)
+        args.endCallback?.()
     }
 
     window.addEventListener('mousemove', handleDragMouseMove)

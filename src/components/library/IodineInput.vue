@@ -424,11 +424,11 @@
     }
 
     function handleMouseDown(event: MouseEvent){
-        if (props.type !== 'number') return
+        if (inputType.value !== 'number') return
         initiateDragListening({
             event: event,
             callback: handleDragMouseMove,
-            onlyCallbackOnStep: true,
+            onlyCallbackOnStepX: true,
             stepSizeX: 10,
         })
 
@@ -438,7 +438,7 @@
         if(args.stepX === 0) return
 
         //set value
-        internalValue.value = Number(internalValue.value) + args.stepX
+        internalValue.value = Number(internalValue.value) + (args.stepX * (step__.value ?? 1))
 
         //clamp value
         if(max__.value)
@@ -559,6 +559,7 @@
     // Expose public methods
     defineExpose({
         focus: setFocus,
+        input: input,
     })
 </script>
 
