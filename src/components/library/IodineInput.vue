@@ -96,6 +96,7 @@
 
 <script setup lang="ts">
     import { ref, computed, onMounted, watch, PropType } from 'vue'
+    import {CallbackArgument, initiateDragListening} from '@/components/library/helpers/dragListener'
 
     import CloseIcon from '@/components/library/icons/CloseIcon.vue'
     import VisibilityIcon from '@/components/library/icons/VisibilityIcon.vue'
@@ -422,41 +423,24 @@
         }
     }
 
-    let dragStartX = 0
-    function handleMouseDown (event: MouseEvent): void {
-
-        if(props.type !== 'number') return;
-
-        window.addEventListener('mousemove', handleDragMouseMove)
-        window.addEventListener('mouseup', handleDragMouseUp)
-
-        dragStartX = event.clientX
-
-    }
-    function handleDragMouseUp (event: MouseEvent): void {
-
-        window.removeEventListener('mousemove', handleDragMouseMove)
-        window.removeEventListener('mouseup', handleDragMouseUp)
+    function handleMouseDown(event: MouseEvent){
+        if (props.type !== 'number') return
+        initiateDragListening({
+            event: event,
+            callback: handleDragMouseMove,
+            onlyCallbackOnStep: true,
+            stepSizeX: 10,
+        })
 
     }
-    function handleDragMouseMove (event: MouseEvent): void {
-        let currentX = event.clientX
+    function handleDragMouseMove (args: CallbackArgument): void {
 
-        let deltaX = currentX - dragStartX
+        if(args.stepX === 0) return
 
-        let threshold = 10
+        //set value
+        internalValue.value = Number(internalValue.value) + args.stepX
 
-        while(deltaX > threshold) {
-            internalValue.value = Number(internalValue.value) + 1
-            dragStartX += threshold
-            deltaX = currentX - dragStartX
-        }
-        while(deltaX < -threshold) {
-            internalValue.value = Number(internalValue.value) - 1
-            dragStartX -= threshold
-            deltaX = currentX - dragStartX
-        }
-
+        //clamp value
         if(max__.value)
         {
             if(Number(internalValue.value) > max__.value) internalValue.value = max__.value
@@ -466,6 +450,16 @@
         {
             if(Number(internalValue.value) < min__.value) internalValue.value = min__.value
         }
+
+
+        //This is a hack tbh.
+        //We aren't allowed to change the selectionStart and selectionEnd of a number input
+        //So we change the type to text, set the selectionStart and selectionEnd and then change the type back to number
+        const oldType = input.value.type
+        input.value.type = 'text'
+        input.value.selectionStart = 0
+        input.value.selectionEnd = 0
+        input.value.type = oldType
 
         emitUpdate()
 
