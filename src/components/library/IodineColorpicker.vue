@@ -176,9 +176,12 @@ function changeColorHEX(newColor: string) {
 let colorNudgingIsDragging = false;
 let colorNudgingCaret = 0;
 function handleColorCodeMouseDown(event: MouseEvent){
+
+    if(!colorOutput.value) return;
+
     typedColor = computedColor.value
     colorNudgingIsDragging = true;
-    colorNudgingCaret = colorOutput.value!.input.selectionStart
+    colorNudgingCaret = colorOutput.value.input.selectionStart
     initiateDragListening({
         event: event,
         callback: (args)=>{
@@ -194,8 +197,10 @@ function handleColorCodeMouseDown(event: MouseEvent){
 }
 
 function nudgeColor(amount: number){
-    
-    let caret = colorOutput.value!.input.selectionStart
+
+    if(!colorOutput.value) return;
+
+    let caret = colorOutput.value.input.selectionStart
     if(colorNudgingIsDragging)
     {
         caret = colorNudgingCaret
@@ -283,7 +288,9 @@ function nudgeColor(amount: number){
         }
     }
     nextTick(() => {
-        let input = colorOutput.value!.input
+        if(!colorOutput.value) return;
+
+        let input = colorOutput.value.input
         let newCaret = caret + (computedColor.value.length - lengthOrig)
         colorNudgingCaret = newCaret
         input.selectionStart = newCaret

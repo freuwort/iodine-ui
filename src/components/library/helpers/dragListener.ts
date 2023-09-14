@@ -63,7 +63,7 @@ export function initiateDragListening (args: InitialArguments): void {
             stepY: stepY
         })
     }
-    const handleDragMouseUp = (event: MouseEvent): void => {
+    const handleDragMouseUp = (): void => {
         window.removeEventListener('mousemove', handleDragMouseMove)
         window.removeEventListener('mouseup', handleDragMouseUp)
         args.endCallback?.()

@@ -32,7 +32,7 @@ export function useElementBounding(
 ) : refDOMBounds{
 
   //If the element resizes, update the values
-  const watcher = new ResizeObserver(update).observe(unref(target))
+  new ResizeObserver(update).observe(unref(target))
 
   function update() {
     const el = unref(target)

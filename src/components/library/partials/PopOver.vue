@@ -16,7 +16,7 @@
 </script>
 
 <script setup lang="ts">
-import { PropType, StyleValue, computed, getCurrentInstance, onMounted, ref } from 'vue';
+import { PropType, StyleValue, computed, onMounted, ref } from 'vue';
 import {refDOMBounds, getEmptyRefDOMBounds, useElementBounding} from '../helpers/refDOMBounds';
 
 
