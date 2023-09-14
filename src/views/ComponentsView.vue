@@ -270,9 +270,9 @@
                 <div class="group">
                     <h2>Picker</h2>
                     <div class="flex gap-1">
-                        <!-- <IodineIconpicker :icons="icons">
+                        <IodineIconpicker :icons="icons">
                             <IodineButton type="button" label="Open Iconpicker"/>
-                        </IodineIconpicker> -->
+                        </IodineIconpicker>
                         <IodineColorpicker :swatch-palettes="swatchPalettes">
                             <IodineButton type="button" label="Open Colopicker"/>
                         </IodineColorpicker>

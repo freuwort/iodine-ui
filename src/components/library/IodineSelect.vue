@@ -172,6 +172,7 @@ function handleKeyDown(event: KeyboardEvent)
   ];
 
   if(!keys.includes(event.key)) { return; }
+  if(!popoverComponent.value) { return; }
 
   event.preventDefault();
   let options = props.options;
@@ -241,9 +242,9 @@ function handleKeyDown(event: KeyboardEvent)
       break;
     case "Enter":
 
-      if(!popoverComponent.value!.showing)
+      if(!popoverComponent.value.showing)
       {
-        popoverComponent.value!.showing = true;
+        popoverComponent.value.showing = true;
         return;
       }
 
@@ -253,7 +254,7 @@ function handleKeyDown(event: KeyboardEvent)
       }
       break;
     case "Escape":
-      popoverComponent.value!.showing = false;
+      popoverComponent.value.showing = false;
       break;
   }
 }
@@ -326,20 +327,21 @@ const emits = defineEmits([
   'update:modelValue',
 ])
 
+
 function activate(event: Event)
 {
-  if (popoverComponent.value == null) return;
+  if(!popoverComponent.value) return;
 
   if (['mousedown'].includes(event?.type))
   {
-    popoverComponent.value!.toggle();
+    popoverComponent.value.toggle();
     return;
   }
 
   // Bounce blur event if it comes from relatedTarget inside the popover
   if (event instanceof FocusEvent)
   {
-    let node = event.relatedTarget as HTMLElement
+    let node = event.relatedTarget as HTMLElement | null
 
     while (node)
     {
@@ -353,13 +355,14 @@ function activate(event: Event)
         break;
       }
 
-      node = node.parentElement!;
+      node = node.parentElement;
     }
   }
 
   if (['blur'].includes(event?.type))
   {
-    popoverComponent.value!.showing = false;
+    if(!popoverComponent.value) return;
+    popoverComponent.value.showing = false;
     return;
   }
 }
@@ -367,7 +370,7 @@ function activate(event: Event)
 function checkOptionCloseOnBlur(event: FocusEvent)
 {
   if(!props.multiple) return;
-  let node = event.relatedTarget as HTMLElement
+  let node = event.relatedTarget as HTMLElement | null
 
   while (node)
   {
@@ -375,10 +378,11 @@ function checkOptionCloseOnBlur(event: FocusEvent)
     {
       return
     }
-    node = node.parentElement!;
+    node = node.parentElement;
   }
   //we clicked outside, hide the popover
-  popoverComponent.value!.showing = false;
+  if(!popoverComponent.value) return;
+  popoverComponent.value.showing = false;
 }
 
 function change(option: Option)
