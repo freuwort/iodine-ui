@@ -554,12 +554,33 @@
         immediate: true
     })
 
-
+    //TODO: Evaluate cleanlieness of this
+    function getExposedNativeInputAttributes<T>(attr: keyof HTMLInputElement) {
+        let val = ref<T | null>(null)
+        let proxyValHandler = {
+            get(target: typeof val, prop: string) {
+                if (prop === "value") {
+                    (val.value as T) = (input.value[attr] as T)
+                }
+                return Reflect.get(target, prop);
+            },
+            set(target: typeof val, prop: string, value: any) {
+                if (prop === "value") {
+                    (input.value[attr] as T) = value
+                }
+                return Reflect.set(target, prop, value);
+            }
+        }
+        let proxyVal = new Proxy(val, proxyValHandler)
+        return proxyVal
+    }
 
     // Expose public methods
     defineExpose({
         focus: setFocus,
         input: input,
+        selectionStart: getExposedNativeInputAttributes<number|null>('selectionStart'),
+        selectionEnd: getExposedNativeInputAttributes<number|null>('selectionEnd'),
     })
 </script>
 

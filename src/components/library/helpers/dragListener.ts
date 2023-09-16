@@ -7,7 +7,7 @@ export type CallbackArgument = {
     stepX: number,
     stepY: number
 }
-export type CallbackFunction = (arg: CallbackArgument) => void
+export type CallbackFunction = (_arg: CallbackArgument) => void
 
 export type InitialArguments = {
     event: MouseEvent,
