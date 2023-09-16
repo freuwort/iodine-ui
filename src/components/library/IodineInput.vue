@@ -2,7 +2,6 @@
     <label
         ref="containerElement"
         class="iod-container iod-input"
-        :id="nativeId || (id ? 'label-for-'+id : undefined)"
         :class="classes"
         tabindex="-1"
     >
@@ -22,10 +21,10 @@
                     <span class="prefix" v-if="prefix">{{prefix}}</span>
 
                     <div class="input-compactor">
-                        <component
+                        <input
                             ref="input"
                             class="input"
-                            :is="'input'"
+                            :form="form"
                             :pattern="pattern"
                             :autocomplete="autocomplete"
                             :spellcheck="spellcheck"
@@ -35,7 +34,6 @@
                             :aria-required="required"
                             :readonly="readonly"
                             :tabindex="tabindex"
-                            :id="id"
                             :name="name"
                             :title="title"
                             :type="computedInputType"
@@ -47,7 +45,7 @@
                             :autofocus="autofocus"
                             :value="internalValue"
                             :aria-label="label"
-                            @input="setInput($event.target.value); emitUpdate()"
+                            @input="setInput(($event.target as HTMLInputElement).value); emitUpdate()"
                             @focus.stop="inputEvent('focus', $event)"
                             @blur.stop="inputEvent('blur', $event)"
                             @keydown="inputEvent('keydown', $event)"
@@ -58,7 +56,7 @@
                             @keydown.enter="inputEvent('enter', $event)"
                             @keydown.space="inputEvent('space', $event)"
                             @mousedown="handleMouseDown($event)"
-                        ></component>
+                        />
 
                         <div class="placeholder" v-if="placeholder">{{placeholder}}</div>
                     </div>
@@ -127,13 +125,8 @@
             type: String,
             default: 'text',
         },
-        id: {
+        form: {
             type: String,
-            default: null,
-        },
-        nativeId: {
-            type: String,
-            default: '',
         },
         name: {
             type: String,
@@ -291,16 +284,16 @@
 
 
 
-    const min__ = computed((): number|null => {
-        return parseNumber(props.min)
+    const min__ = computed((): number|undefined => {
+        return parseNumber(props.min) ?? undefined
     })
 
-    const max__ = computed((): number|null => {
-        return parseNumber(props.max)
+    const max__ = computed((): number|undefined => {
+        return parseNumber(props.max) ?? undefined
     })
 
-    const step__ = computed((): number|null => {
-        return parseNumber(props.step)
+    const step__ = computed((): number|undefined => {
+        return parseNumber(props.step) ?? undefined
     })
 
 
