@@ -111,7 +111,7 @@ const color = ref({ hue: 0, saturation: 1, brightness: 1, alpha: 1 } as HSBColor
 const outputMode = ref('hex' as 'hex' | 'rgb' | 'hsl' | 'hsb')
 const swatchPalette = ref(null as string | null)
 const outputSelector = ref<typeof IodineSelect | null>(null)
-const colorOutput = ref<typeof IodineInput | null>(null)
+const colorOutput = ref<InstanceType<typeof IodineInput> | null>(null)
 let typedColor = "";
 
 
@@ -175,13 +175,13 @@ function changeColorHEX(newColor: string) {
 
 let colorNudgingIsDragging = false;
 let colorNudgingCaret = 0;
-function handleColorCodeMouseDown(event: MouseEvent){
-
+async function handleColorCodeMouseDown(event: MouseEvent){
     if(!colorOutput.value) return;
+    if(!colorOutput.value.selectionStart) return;
 
     typedColor = computedColor.value
     colorNudgingIsDragging = true;
-    colorNudgingCaret = colorOutput.value.input.selectionStart
+    colorNudgingCaret = colorOutput.value.selectionStart;
     initiateDragListening({
         event: event,
         callback: (args)=>{
@@ -191,7 +191,7 @@ function handleColorCodeMouseDown(event: MouseEvent){
             colorNudgingIsDragging = false;
         },
         onlyCallbackOnStepY: true,
-        stepSizeY: 10,
+        stepSizeY: 4,
     })
 
 }
@@ -199,8 +199,9 @@ function handleColorCodeMouseDown(event: MouseEvent){
 function nudgeColor(amount: number){
 
     if(!colorOutput.value) return;
+    if(colorOutput.value.selectionStart == null) return;
 
-    let caret = colorOutput.value.input.selectionStart
+    let caret = colorOutput.value.selectionStart;
     if(colorNudgingIsDragging)
     {
         caret = colorNudgingCaret
@@ -290,7 +291,7 @@ function nudgeColor(amount: number){
     nextTick(() => {
         if(!colorOutput.value) return;
 
-        let input = colorOutput.value.input
+        let input = colorOutput.value
         let newCaret = caret + (computedColor.value.length - lengthOrig)
         colorNudgingCaret = newCaret
         input.selectionStart = newCaret
