@@ -76,3 +76,29 @@ export function initiateDragListening (args: InitialArguments): void {
     dragStartY = args.event.clientY
 
 }
+
+export function temporarySetCursor (cursor: string): ()=>void {
+
+    const css = `* { cursor: ${cursor} !important; }`,
+    styletag = document.createElement("style");
+
+    styletag.type = "text/css";
+    if (styletag.sheet) {
+        styletag.sheet.insertRule(css);
+    } else {
+        styletag.appendChild(document.createTextNode(css));
+    }
+
+    document.addEventListener("mouseup", function myFunction_Default() {
+        //check if the style tag is still there
+        if(styletag.parentNode)
+            styletag.remove();
+    }, { once: true});
+
+    document.body.appendChild(styletag);
+
+    return function () {
+        if(styletag.parentNode)
+            styletag.remove();
+    }
+}

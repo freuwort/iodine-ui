@@ -96,7 +96,7 @@
 
 <script setup lang="ts">
     import { ref, computed, onMounted, watch, PropType } from 'vue'
-    import {CallbackArgument, initiateDragListening} from '@/components/library/helpers/dragListener'
+    import {CallbackArgument, initiateDragListening, temporarySetCursor} from '@/components/library/helpers/dragListener'
 
     import CloseIcon from '@/components/library/icons/CloseIcon.vue'
     import VisibilityIcon from '@/components/library/icons/VisibilityIcon.vue'
@@ -424,8 +424,10 @@
         }
     }
 
+    let firstDragFrame = true;
     function handleMouseDown(event: MouseEvent){
         if (inputType.value !== 'number') return
+        firstDragFrame = true
         initiateDragListening({
             event: event,
             callback: handleDragMouseMove,
@@ -437,6 +439,14 @@
     function handleDragMouseMove (args: CallbackArgument): void {
 
         if(args.stepX === 0) return
+
+        if(firstDragFrame)
+        {
+            firstDragFrame = false
+            temporarySetCursor('ew-resize');
+            return
+        }
+
 
         //set value
         internalValue.value = Number(internalValue.value) + (args.stepX * (step__.value ?? 1))
