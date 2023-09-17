@@ -97,7 +97,7 @@ import { ref, computed, nextTick } from 'vue'
 import AreaSlider from './partials/AreaSlider.vue'
 import IodineSelect from './IodineSelect.vue'
 import IodineInput from './IodineInput.vue'
-import { initiateDragListening } from './helpers/dragListener';
+import { initiateDragListening, temporarySetCursor } from './helpers/dragListener';
 
 
 
@@ -209,6 +209,7 @@ function nudgeColor(amount: number){
             //Wait for the first drag event to set the caret
             //This ensures that the caret is set to the correct position
             colorNudgingCaret = caret;
+            temporarySetCursor('ns-resize');
         }
         caret = colorNudgingCaret
     }

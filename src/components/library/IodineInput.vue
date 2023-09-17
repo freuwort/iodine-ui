@@ -96,7 +96,7 @@
 
 <script setup lang="ts">
     import { ref, computed, onMounted, watch, PropType } from 'vue'
-    import {CallbackArgument, initiateDragListening} from '@/components/library/helpers/dragListener'
+    import {CallbackArgument, initiateDragListening, temporarySetCursor} from '@/components/library/helpers/dragListener'
 
     import CloseIcon from '@/components/library/icons/CloseIcon.vue'
     import VisibilityIcon from '@/components/library/icons/VisibilityIcon.vue'
@@ -425,6 +425,7 @@
 
     function handleMouseDown(event: MouseEvent){
         if (inputType.value !== 'number') return
+        temporarySetCursor('ew-resize');
         initiateDragListening({
             event: event,
             callback: handleDragMouseMove,
