@@ -181,7 +181,7 @@ async function handleColorCodeMouseDown(event: MouseEvent){
 
     typedColor = computedColor.value
     colorNudgingIsDragging = true;
-    colorNudgingCaret = colorOutput.value.selectionStart;
+    colorNudgingCaret = -1;
     initiateDragListening({
         event: event,
         callback: (args)=>{
@@ -204,6 +204,12 @@ function nudgeColor(amount: number){
     let caret = colorOutput.value.selectionStart;
     if(colorNudgingIsDragging)
     {
+        if(colorNudgingCaret == -1)
+        {
+            //Wait for the first drag event to set the caret
+            //This ensures that the caret is set to the correct position
+            colorNudgingCaret = caret;
+        }
         caret = colorNudgingCaret
     }
 
