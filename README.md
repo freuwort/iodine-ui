@@ -1,8 +1,8 @@
 # Iodine UI (WIP) 🎚️
 Iodine UI is a Material Design inspired UI library for Vue 3 with a focus on interactive components.  
-At the moment this library offers **icons**, **buttons**, **icon buttons**, **single-line inputs**, **popup modals**, **toggles/checkboxes** and **loaders** all designed with care and accessibility on mind.  
+At the moment this library offers **icons**, **buttons**, **icon buttons**, **single-line inputs**, **select inputs**, **popup modals**, **toggles/checkboxes** and **loaders** all designed with care and accessibility on mind.  
   
-We're planning to introduce **select inputs**, **date/time pickers**, **colorpickers**, **iconpickers** and **textareas** in the near future.  
+We're planning to introduce **date/time pickers**, **colorpickers**, **iconpickers** and **textareas** in the near future.  
 <br>
 
 ## Installation ⚙️
@@ -31,14 +31,13 @@ app.mount("#app");
 **Local import**
 ```javascript
 // Import components individually
-import { IodineIcon, IodineButton, IodineIconButton, IodineInput, IodinePopup, IodineLoader } from "@freuwort/iodine-ui";
+import { IodIcon, IodButton, IodIconButton, IodInput, IodSelect, IodPopup, IodLoader } from "@freuwort/iodine-ui";
 ```
 <br>
 
 ## Usage 🪛
 ```html
 <IodInput type="text" label="Firstname" v-model="yourValue"/>
-<!-- "<IodineInput />" if you import it locally-->
 ```
 <br/>
 
