@@ -423,9 +423,10 @@
         }
     }
 
+    let firstDragFrame = true;
     function handleMouseDown(event: MouseEvent){
         if (inputType.value !== 'number') return
-        temporarySetCursor('ew-resize');
+        firstDragFrame = true
         initiateDragListening({
             event: event,
             callback: handleDragMouseMove,
@@ -437,6 +438,14 @@
     function handleDragMouseMove (args: CallbackArgument): void {
 
         if(args.stepX === 0) return
+
+        if(firstDragFrame)
+        {
+            firstDragFrame = false
+            temporarySetCursor('ew-resize');
+            return
+        }
+
 
         //set value
         internalValue.value = Number(internalValue.value) + (args.stepX * (step__.value ?? 1))
