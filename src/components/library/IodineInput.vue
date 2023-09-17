@@ -494,7 +494,7 @@
     // START: Misc
     const setFocus = (): void => {
         input.value.focus()
-        console.log('FOCUSING')
+        // console.log('FOCUSING')
     }
 
     const toggleObfuscation = (): void => {

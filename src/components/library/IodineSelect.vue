@@ -54,11 +54,6 @@
   </div>
 </template>
 
-<script lang="ts">
-type InputTypes_ = string | number | boolean | undefined | null;
-export type SelectInputTypes = InputTypes_ | InputTypes_[];
-</script>
-
 <script setup lang="ts">
 import { onMounted, getCurrentInstance, Ref, PropType, ref, watch, computed, nextTick, isProxy, toRaw } from "vue";
 import {getEmptyRefDOMBounds, useElementBounding} from './helpers/refDOMBounds';
@@ -67,6 +62,9 @@ import PopOver from "./partials/PopOver.vue";
 import IodineInput from "@/components/library/IodineInput.vue";
 import IodineToggle from "@/components/library/IodineToggle.vue";
 import DropdownArrowIcon from "@/components/library/icons/DropdownArrowIcon.vue";
+
+type InputTypes_ = string | number | boolean | undefined | null;
+type SelectInputTypes = InputTypes_ | InputTypes_[];
 
 /*
 Reference: https://www.w3schools.com/tags/tag_select.asp
