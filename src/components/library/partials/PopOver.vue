@@ -33,6 +33,10 @@ const props = defineProps({
         type: String as PropType<'top' | 'bottom'>,
         default: 'top'
     },
+    forcePlacement: {
+        type: Boolean,
+        default: false
+    },
     visible: {
         type: Boolean,
         default: false
@@ -84,7 +88,19 @@ const positionCSS = computed(() => {
         css.left = `${bodyRect.width - ourBounds.width.value - graceMargin}px`;
     }
 
-    switch (props.placement) {
+    let actualPlacement = props.placement;
+    if(!props.forcePlacement)
+    {
+        //check if the current placement (top / bottom) is possible without clipping the window
+        let preferBottom = Math.abs(Math.min(props.parentRect.top.value - ourBounds.height.value, 0))
+        let preferTop = Math.max(props.parentRect.bottom.value + ourBounds.height.value - window.innerHeight, 0)
+
+        if(preferBottom > preferTop) actualPlacement = 'bottom'
+        else if(preferTop > preferBottom) actualPlacement = 'top';
+
+    }
+
+    switch (actualPlacement) {
         case 'top':
             css.top = `${offsetToBody.top}px`;
             css.transform = `translateY(-100%)`;
