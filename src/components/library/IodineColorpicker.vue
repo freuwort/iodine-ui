@@ -36,8 +36,9 @@
                     { value: 'rgb', text: 'RGB' },
                     { value: 'hsl', text: 'HSL' },
                     { value: 'hsb', text: 'HSB' },
-                ]
-            "/>
+                ].filter(e => props.allowedOutputFormats.includes(e.value as any))
+            "
+            :disabled="colorModeSelectedDisabled"/>
 
             <div class="sub-layout">
                 <IodineInput type="text" ref="colorOutput" v-model="computedColor" @keydown="keyDown" @mousedown="handleColorCodeMouseDown"/>
@@ -92,7 +93,7 @@ interface SwatchPalette {
 </script>
 
 <script setup lang="ts">
-import { ref, computed, nextTick } from 'vue'
+import { ref, computed, nextTick, watch, onMounted, PropType } from 'vue'
 
 import AreaSlider from './partials/AreaSlider.vue'
 import IodineSelect from './IodineSelect.vue'
@@ -101,19 +102,38 @@ import { initiateDragListening, temporarySetCursor } from './helpers/dragListene
 
 
 
-const props = defineProps<{
-    swatchPalettes: SwatchPalette[] | undefined;
-}>()
+const props = defineProps({
+    swatchPalettes: {
+        type:null as unknown as PropType<Array<SwatchPalette> | undefined>,
+        default: ()=>undefined,
+    },
+    modelValue: {
+        type: null as unknown as PropType<HSBColor | HSLColor | RGBColor | HexColor | string | undefined>,
+        default: ()=>undefined,
+    },
+    outputFormat: {
+        type: String as PropType<'hex' | 'rgb' | 'hsl' | 'hsb' | undefined>,
+        default: undefined,
+    },
+    fixOutputFormat: {
+        type: Boolean,
+        default: false,
+    },
+    allowedOutputFormats: {
+        type: Array as PropType<Array<'hex' | 'rgb' | 'hsl' | 'hsb'>>,
+        default: ()=>['hex', 'rgb', 'hsl', 'hsb'],
+    }
+})
 
+const colorModeSelectedDisabled = ref(false)
 
 
 const color = ref({ hue: 0, saturation: 1, brightness: 1, alpha: 1 } as HSBColor)
 const outputMode = ref('hex' as 'hex' | 'rgb' | 'hsl' | 'hsb')
 const swatchPalette = ref(null as string | null)
-const outputSelector = ref<typeof IodineSelect | null>(null)
+const outputSelector = ref<InstanceType<typeof IodineSelect> | null>(null)
 const colorOutput = ref<InstanceType<typeof IodineInput> | null>(null)
 let typedColor = "";
-
 
 const computedColor = computed({
     get(){
@@ -136,6 +156,7 @@ const computedColor = computed({
         typedColor = value;
     }
 })
+
 
 function keyDown(event: KeyboardEvent) {
 
@@ -594,6 +615,96 @@ function rgb2hex (color: RGBColor): HexColor
     }
 }
 
+function updateModelValue()
+{
+    let localColor:HSBColor|HSLColor|RGBColor|HexColor;
+    switch(outputMode.value) {
+        case 'hex':
+            localColor = {hex: computedColor.value} as HexColor
+            break
+        case 'rgb':
+            {
+                let tmp = rgbStringToRGB(computedColor.value)
+                localColor = {red: tmp.r, green: tmp.g, blue: tmp.b, alpha: color.value.alpha * 100} as RGBColor
+                break
+            }
+        case 'hsl':
+            {
+                //break up the string "hhh, sss%, lll%" into an array of numbers
+                let tmpColor = computedColor.value
+                tmpColor = tmpColor.replaceAll('hsl(', '').replaceAll(')', '').replaceAll(' ', '').replaceAll('%', '')
+                let [h, s, l] = tmpColor.split(',').map(e => Number(e))
+                localColor = {hue: h, saturation: s, lightness: l, alpha: color.value.alpha * 100} as HSLColor
+                break
+            }
+        case 'hsb':
+            {
+                localColor = {hue: color.value.hue * 360, saturation: color.value.saturation * 100, brightness: color.value.brightness * 100, alpha: color.value.alpha} as HSBColor
+                break
+            }
+        default:
+            return
+    }
+    emits('update:modelValue', localColor)
+}
+
+function setColor(c: RGBColor | HSBColor | HSLColor | HexColor | string)
+{
+    let localColor = color.value
+    if(typeof c === "string")
+    {
+        let rgb = hexStringToRGB(c as string)
+        color.value = rgb2hsb({red: rgb.r/255, green: rgb.g/255, blue: rgb.b/255, alpha: color.value.alpha})
+    }
+    else{
+        switch(true) {
+            case 'red' in c:
+                color.value = rgb2hsb(c as RGBColor)
+            break
+            case 'brightness' in c:
+                color.value = c as HSBColor
+            break
+            case 'lightness' in c:
+                color.value = rgb2hsb(hsl2rgb(c as HSLColor))
+            break
+            case 'hex' in c:
+            {
+                let rgb = hexStringToRGB((c as HexColor).hex)
+                color.value = rgb2hsb({red: rgb.r/255, green: rgb.g/255, blue: rgb.b/255, alpha: color.value.alpha})
+            }
+            break
+        }
+    }
+
+    if([color.value.hue, color.value.saturation, color.value.brightness].some(e => isNaN(e))) {
+        color.value = localColor
+        console.warn("Invalid color value", c)
+    }
+
+}
+
+watch(computedColor, updateModelValue);
+watch(computedAlpha, updateModelValue);
+
+onMounted(() => {
+    if(props.outputFormat) {
+        outputMode.value = props.outputFormat
+    }
+    if(props.fixOutputFormat) {
+        colorModeSelectedDisabled.value = true
+    }
+    if(!props.allowedOutputFormats.includes(outputMode.value)){
+        outputMode.value = props.allowedOutputFormats[0]
+    }
+    if(props.allowedOutputFormats.length == 1){
+        colorModeSelectedDisabled.value = true
+    }
+    if(props.modelValue) {
+        setColor(props.modelValue)
+    }
+})
+
+let emits = defineEmits(['update:modelValue'])
 
 </script>
 
