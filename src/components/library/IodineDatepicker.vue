@@ -1,24 +1,36 @@
 <template>
     <div class="iod-container iod-datepicker">
         <div class="skipper">
-            <iodine-button border shape="radius-l" @click="nudgeMonth(-12)">&lt;&lt;</iodine-button>
-            <iodine-button border shape="radius-l" @click="nudgeMonth(-1)">&lt;</iodine-button>
+            <IodIconButton type="button" variant="text" icon="keyboard_double_arrow_left" size="small" @click="nudgeMonth(-12)"/>
+            <IodIconButton type="button" variant="text" icon="chevron_left" size="small" @click="nudgeMonth(-1)"/>
             <div disabled> {{monthString}} </div>
-            <iodine-button border shape="radius-l" @click="nudgeMonth(+1)">&gt;</iodine-button>
-            <iodine-button border shape="radius-l" @click="nudgeMonth(+12)">&gt;&gt;</iodine-button>
+            <IodIconButton type="button" variant="text" icon="chevron_right" size="small" @click="nudgeMonth(+1)"/>
+            <IodIconButton type="button" variant="text" icon="keyboard_double_arrow_right" size="small" @click="nudgeMonth(+12)"/>
         </div>
         <div class="calendar">
-            <div class="dayIndicator" v-for="abbr, i in weekDayAbbreviations" :key="i">{{ abbr }}</div>
-            <div :class="[
+            <div class="day-indicator" v-for="abbr, i in weekDayAbbreviations" :key="i">{{ abbr }}</div>
+            <div class="day-wrapper" v-for="day, i in days" :key="i" :class="[
+                    day.isCurrentMonth ? 'current-month' : 'other-month',
+                    {
+                        'selected': day.selected > -1 || i == 20,
+                        'current-day': day.isCurrentDay,
+                    }
+                ]">
+                <button type="button" class="day" :label="day.dayIndex.toString()">{{day.dayIndex}}</button>
+            </div>
+
+            <!-- <button type="button" :class="[
                 'day',
                 day.isCurrentMonth ? 'current-month' : 'other-month',
                 day.isCurrentDay  ? 'current-day' : ''
-            ]" v-for="day, i in days" :key="i">
+            ]" v-for="day, i in days" :key="i"
+            :data-selected="day.selected > -1"
+            @click="selectDay(day)">
                 {{day.dayIndex}}
-            </div>
+            </button> -->
         </div>
-        <div class="applySection">
-            <iodine-button border shape="radius-l"> APPLY </iodine-button>
+        <div class="apply-section">
+            <IodButton type="button" label="Apply" variant="contained"/>
         </div>
     </div>
 </template>
@@ -27,7 +39,8 @@
 </script>
 
 <script setup lang="ts">
-import IodineButton from '@/components/library/IodineButton.vue'
+import IodButton from '@/components/library/IodineButton.vue'
+import IodIconButton from '@/components/library/IodineIconButton.vue'
 import { computed, ref } from 'vue';
 
 function nudgeMonth(nudge: number) {
@@ -45,6 +58,17 @@ function nudgeMonth(nudge: number) {
     }
 
     currentTime.value = new Date(year, month, date)
+}
+
+function selectDay(day: {
+    dayIndex: number,
+    isCurrentMonth: boolean,
+    selected: number,
+    isCurrentDay: boolean
+})
+{
+    day.selected = day.selected + 1
+    console.log(day)
 }
 
 function getWeekDays(locale: Intl.LocalesArgument)
@@ -90,18 +114,22 @@ const weekIndexOfFirstDay = computed(()=>{
 })
 
 const days = computed(()=>{
-    const days = []
 
     let lastMonthDays = weekIndexOfFirstDay.value
     if(lastMonthDays < 3) {
         lastMonthDays += 7
     }
 
+    let preDays =  []
+    let currDays = []
+    let postDays = []
+
     for (let i = 1; i < lastMonthDays; i++) {
-        days.push(
+        preDays.push(
             {
                 dayIndex: lastMonthMaxDays.value - (lastMonthDays - i) + 1,
                 isCurrentMonth: false,
+                selected: -1,
                 isCurrentDay: currentLiveTime.getDate() === lastMonthMaxDays.value - (lastMonthDays - i) + 1 &&
                     (
                         currentLiveTime.getMonth() == currentTime.value.getMonth() - 1 ||
@@ -114,25 +142,27 @@ const days = computed(()=>{
         )
     }
     for (let i = 1; i < currentMonthMaxDays.value; i++) {
-        days.push(
+        currDays.push(
             {
                 dayIndex: i,
                 isCurrentMonth: true,
+                selected: -1,
                 isCurrentDay: currentLiveTime.getDate() === i &&
                     currentLiveTime.getMonth() == currentTime.value.getMonth() &&
                     currentLiveTime.getFullYear() == currentTime.value.getFullYear()
             }
         )
     }
-    let nextMonthDays = 7 - (days.length % 7) + 1
+    let nextMonthDays = 7 - ((preDays.length + currDays.length) % 7) + 1
     if(nextMonthDays < 3) {
         nextMonthDays += 7
     }
     for (let i = 1; i < nextMonthDays; i++) {
-        days.push(
+        postDays.push(
             {
                 dayIndex: i,
                 isCurrentMonth: false,
+                selected: -1,
                 isCurrentDay: currentLiveTime.getDate() === i &&
                 (
                     currentLiveTime.getMonth() == currentTime.value.getMonth() +1 ||
@@ -144,6 +174,8 @@ const days = computed(()=>{
             }
         )
     }
+    let days = [...preDays, ...currDays, ...postDays]
+
     return days
 })
 
@@ -151,99 +183,96 @@ const days = computed(()=>{
 
 <style lang="sass" scoped>
     .iod-container.iod-datepicker
+        --local-button-size: 2.5rem
+
         background: var(--color-background)
         border-radius: var(--radius-m)
-        padding: .5rem 0
         border: 1px solid var(--color-border)
-        width: 320px
-        height: fit-content
         display: flex
         flex-direction: column
         box-sizing: border-box
+        height: fit-content
 
         *
             box-sizing: inherit
 
-
         .skipper
-            padding: .5rem
-            padding-bottom: 1rem
-            width: 100%
-            height: fit-content
-            gap: .5rem
-            background: var(--color-background)
+            display: flex
+            align-items: center
+            padding: 1rem
+            gap: 0
             border-bottom: 1px solid var(--color-border)
+
             .iod-button
-                --local-color-background: var(--color-background)
-                --local-color-text: var(--color-text)
-                width: 32px
-                &:nth-child(1),
-                &:nth-child(4)
-                    margin-right: .5rem
+                flex: none
+                --local-color-background: var(--color-text)
+
             div
-                width: calc(calc(100% - 128px) - 1rem)
-                height:100%
+                flex: 1
                 color: var(--color-text)
-                align-items: center
-                justify-content: center
-                display: inline-flex
-                height: 2.5em
                 user-select: none
-        .applySection
-            padding: .5rem
-            padding-top: 1rem
-            width: 100%
-            height: fit-content
-            gap: .5rem
-            background: var(--color-background)
-            border-top: 1px solid var(--color-border)
-            .iod-button
-                --local-color-background: var(--color-background)
-                --local-color-text: var(--color-text)
-                width: 100%
-                &:focus
-                    background: var(--color-primary) !important
+                text-align: center
 
         .calendar
-            padding: .5rem
-            height: fit-content
-            aspect-ratio: 1
+            padding: .75rem
             display: grid
-            gap: .5rem
-            grid-template-columns: auto auto auto auto auto auto auto
-            grid-template-rows: auto auto auto auto auto auto
-            background: var(--color-background)
+            gap: 0
+            grid-template-columns: repeat(7, auto)
+            grid-template-rows: repeat(6, auto)
 
-            > div
-                border-style: solid
-                border-width: 2px
-                border-color: rgba(0,0,0,0)
-                align-items: center
-                border-radius: 20%
-                width: 100%
-                height: 100%
-
-            .dayIndicator
+            .day-indicator
                 color: var(--color-text-soft)
                 aspect-ratio: 1
                 display: inline-grid
                 text-align: center
-            .day
-                color: var(--color-text)
-                aspect-ratio: 1
-                display: inline-grid
-                text-align: center
-                border-style: solid
-                border-width: 2px
 
+            .day-wrapper
+                display: flex
+                align-items: center
+                justify-content: center
+                height: calc(var(--local-button-size) + .5rem)
+                aspect-ratio: 1
+                
                 &.other-month
-                    color: var(--color-text-soft-disabled)
-                &.current-day
-                    background-color: var(--color-primary)
-                    color: var(--color-background)
-                &:hover
-                    border-color: var(--color-primary)
-                    border-style: solid
-                    border-width: 2px
+                    .day
+                        color: var(--color-text-soft-disabled)
+
+                .day
+                    height: var(--local-button-size)
+                    aspect-ratio: 1
+                    padding: 0
+                    margin: 0
+                    display: flex
+                    align-items: center
+                    justify-content: center
+                    border-radius: var(--radius-m)
+                    background: transparent
+                    border: none
+                    font-family: inherit
+                    font-size: inherit
                     cursor: pointer
+                    color: var(--color-text-soft)
+
+                    &:hover
+                        background: var(--color-background-soft)
+                        color: var(--color-text-soft)
+                        
+                &.current-day
+                    .day
+                        background-color: var(--color-background-soft)
+
+                &.selected
+                    .day
+                        background-color: var(--color-primary)
+                        color: var(--color-on-primary)
+
+        .apply-section
+            display: flex
+            align-items: center
+            padding: 1rem
+            gap: .5rem
+            border-top: 1px solid var(--color-border)
+
+            .iod-button
+                flex: 1
 </style>
