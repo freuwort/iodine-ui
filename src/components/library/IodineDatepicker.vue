@@ -3,18 +3,12 @@
         <div class="skipper">
             <iodine-button border shape="radius-l" @click="nudgeMonth(-12)">&lt;&lt;</iodine-button>
             <iodine-button border shape="radius-l" @click="nudgeMonth(-1)">&lt;</iodine-button>
-            <iodine-button disabled> {{monthString}} </iodine-button>
+            <div disabled> {{monthString}} </div>
             <iodine-button border shape="radius-l" @click="nudgeMonth(+1)">&gt;</iodine-button>
             <iodine-button border shape="radius-l" @click="nudgeMonth(+12)">&gt;&gt;</iodine-button>
         </div>
         <div class="calendar">
-            <div class="dayIndicator">Mo</div>
-            <div class="dayIndicator">Di</div>
-            <div class="dayIndicator">Mi</div>
-            <div class="dayIndicator">Do</div>
-            <div class="dayIndicator">Fr</div>
-            <div class="dayIndicator">Sa</div>
-            <div class="dayIndicator">So</div>
+            <div class="dayIndicator" v-for="abbr, i in weekDayAbbreviations" :key="i">{{ abbr }}</div>
             <div :class="[
                 'day',
                 day.isCurrentMonth ? 'current-month' : 'other-month',
@@ -36,8 +30,6 @@
 import IodineButton from '@/components/library/IodineButton.vue'
 import { computed, ref } from 'vue';
 
-//FIXME: following code is a hack to have a working prototype
-
 function nudgeMonth(nudge: number) {
     let year = currentTime.value.getFullYear()
     let month = currentTime.value.getMonth() + nudge
@@ -54,6 +46,20 @@ function nudgeMonth(nudge: number) {
 
     currentTime.value = new Date(year, month, date)
 }
+
+function getWeekDays(locale: Intl.LocalesArgument)
+{
+    var baseDate = new Date(Date.UTC(2017, 0, 2)); // just a Monday
+    var weekDays = [];
+    for(let i = 0; i < 7; i++)
+    {
+        weekDays.push(baseDate.toLocaleDateString(locale, { weekday: 'short' }));
+        baseDate.setDate(baseDate.getDate() + 1);
+    }
+    return weekDays;
+}
+
+const weekDayAbbreviations = getWeekDays('de-DE')
 
 const currentLiveTime = new Date()
 const currentTime = ref(new Date())
@@ -158,15 +164,6 @@ const days = computed(()=>{
         *
             box-sizing: inherit
 
-            .iod-button
-                --local-color-background: var(--color-background)
-                --local-color-text: var(--color-text)
-                width: 32px
-                &:nth-child(3)
-                    width: calc(calc(100% - 128px) - 1rem)
-                &:nth-child(1),
-                &:nth-child(4)
-                    margin-right: .5rem
 
         .skipper
             padding: .5rem
@@ -176,6 +173,22 @@ const days = computed(()=>{
             gap: .5rem
             background: var(--color-background)
             border-bottom: 1px solid var(--color-border)
+            .iod-button
+                --local-color-background: var(--color-background)
+                --local-color-text: var(--color-text)
+                width: 32px
+                &:nth-child(1),
+                &:nth-child(4)
+                    margin-right: .5rem
+            div
+                width: calc(calc(100% - 128px) - 1rem)
+                height:100%
+                color: var(--color-text)
+                align-items: center
+                justify-content: center
+                display: inline-flex
+                height: 2.5em
+                user-select: none
         .applySection
             padding: .5rem
             padding-top: 1rem
@@ -207,6 +220,8 @@ const days = computed(()=>{
                 border-color: rgba(0,0,0,0)
                 align-items: center
                 border-radius: 20%
+                width: 100%
+                height: 100%
 
             .dayIndicator
                 color: var(--color-text-soft)
