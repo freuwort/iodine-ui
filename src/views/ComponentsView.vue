@@ -276,6 +276,7 @@
                         <IodineColorpicker :swatch-palettes="swatchPalettes">
                             <IodineButton type="button" label="Open Colopicker"/>
                         </IodineColorpicker>
+                        <IodineDatepicker/>
                     </div>
                 </div>
                 <div class="group">
@@ -322,6 +323,7 @@
     import IodineLoader from '@/components/library/IodineLoader.vue'
     import IodinePopup from '@/components/library/IodinePopup.vue'
     import IodineColorpicker from '@/components/library/IodineColorpicker.vue'
+    import IodineDatepicker from '@/components/library/IodineDatepicker.vue'
     import IodineIconpicker from '@/components/library/IodineIconpicker.vue'
 
     import IodineSelect from '@/components/library/IodineSelect.vue'
