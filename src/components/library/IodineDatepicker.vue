@@ -15,8 +15,8 @@
                         'selected': selectedDays.find((date : Date | undefined) => date?.getTime() === day.date.getTime()),
                         'current-day': day.isCurrentDay,
                         'sub-selected': isSubSelected(day.date),
-                        'start-row': i%7 === 0 || selectedDays[0] && selectedDays[1] && Math.min(selectedDays[0].getTime(), selectedDays[1].getTime()) === day.date.getTime(),
-                        'end-row': i%7 === 6 || selectedDays[0] && selectedDays[1] && Math.max(selectedDays[0].getTime(), selectedDays[1].getTime()) === day.date.getTime(),
+                        'start-row': isStartRow(i, day.date) && !isEndRow(i, day.date),
+                        'end-row': isEndRow(i, day.date) && !isStartRow(i, day.date),
                     }
                 ]">
                 <button type="button" class="day" :label="day.dayIndex.toString()" @click="selectDay(day)">{{day.dayIndex}}</button>
@@ -52,6 +52,23 @@ function nudgeMonth(nudge: number) {
 
     currentTime.value = new Date(year, month, date)
 }
+
+function isStartRow(i: number, date: Date)
+{
+    if(i%7 === 0) return true
+    if(!selectedDays.value[0]) return false
+    if(!selectedDays.value[1]) return false
+    return Math.min(selectedDays.value[0].getTime(), selectedDays.value[1].getTime()) === date.getTime()
+}
+
+function isEndRow(i: number, date: Date)
+{
+    if(i%7 === 6) return true
+    if(!selectedDays.value[0]) return false
+    if(!selectedDays.value[1]) return false
+    return Math.max(selectedDays.value[0].getTime(), selectedDays.value[1].getTime()) === date.getTime()
+}
+
 
 function isSubSelected(date: Date) {
     if(selectedDays.value[0] === undefined || selectedDays.value[1] === undefined) {
