@@ -12,22 +12,15 @@
             <div class="day-wrapper" v-for="day, i in days" :key="i" :class="[
                     day.isCurrentMonth ? 'current-month' : 'other-month',
                     {
-                        'selected': day.selected > -1 || i == 20,
+                        'selected': selectedDays.find((date : Date | undefined) => date?.getTime() === day.date.getTime()),
                         'current-day': day.isCurrentDay,
+                        'sub-selected': isSubSelected(day.date),
+                        'start-row': i%7 === 0 || selectedDays[0] && selectedDays[1] && Math.min(selectedDays[0].getTime(), selectedDays[1].getTime()) === day.date.getTime(),
+                        'end-row': i%7 === 6 || selectedDays[0] && selectedDays[1] && Math.max(selectedDays[0].getTime(), selectedDays[1].getTime()) === day.date.getTime(),
                     }
                 ]">
-                <button type="button" class="day" :label="day.dayIndex.toString()">{{day.dayIndex}}</button>
+                <button type="button" class="day" :label="day.dayIndex.toString()" @click="selectDay(day)">{{day.dayIndex}}</button>
             </div>
-
-            <!-- <button type="button" :class="[
-                'day',
-                day.isCurrentMonth ? 'current-month' : 'other-month',
-                day.isCurrentDay  ? 'current-day' : ''
-            ]" v-for="day, i in days" :key="i"
-            :data-selected="day.selected > -1"
-            @click="selectDay(day)">
-                {{day.dayIndex}}
-            </button> -->
         </div>
         <div class="apply-section">
             <IodButton type="button" label="Apply" variant="contained"/>
@@ -60,15 +53,35 @@ function nudgeMonth(nudge: number) {
     currentTime.value = new Date(year, month, date)
 }
 
+function isSubSelected(date: Date) {
+    if(selectedDays.value[0] === undefined || selectedDays.value[1] === undefined) {
+        return false
+    }
+    return  (
+                date.getTime() > selectedDays.value[0].getTime() &&
+                date.getTime() < selectedDays.value[1].getTime()
+            ) ||
+            (
+                date.getTime() < selectedDays.value[0].getTime() &&
+                date.getTime() > selectedDays.value[1].getTime()
+            )
+}
+
 function selectDay(day: {
+    date: Date,
     dayIndex: number,
     isCurrentMonth: boolean,
     selected: number,
     isCurrentDay: boolean
 })
 {
-    day.selected = day.selected + 1
-    console.log(day)
+    if(selectFirstDate) {
+        selectedDays.value[0] = day.date
+        selectFirstDate = false
+    } else {
+        selectedDays.value[1] = day.date
+        selectFirstDate = true
+    }
 }
 
 function getWeekDays(locale: Intl.LocalesArgument)
@@ -84,6 +97,9 @@ function getWeekDays(locale: Intl.LocalesArgument)
 }
 
 const weekDayAbbreviations = getWeekDays('de-DE')
+
+const selectedDays = ref([undefined, undefined] as (Date|undefined)[])
+let selectFirstDate = true;
 
 const currentLiveTime = new Date()
 const currentTime = ref(new Date())
@@ -120,13 +136,20 @@ const days = computed(()=>{
         lastMonthDays += 7
     }
 
-    let preDays =  []
+    let preDays =  [] as {
+        date: Date,
+        dayIndex: number,
+        isCurrentMonth: boolean,
+        selected: number,
+        isCurrentDay: boolean
+    }[]
     let currDays = []
     let postDays = []
 
     for (let i = 1; i < lastMonthDays; i++) {
         preDays.push(
             {
+                date: new Date(currentYear.value, currentMonth.value - 1, lastMonthMaxDays.value - (lastMonthDays - i) + 1),
                 dayIndex: lastMonthMaxDays.value - (lastMonthDays - i) + 1,
                 isCurrentMonth: false,
                 selected: -1,
@@ -141,9 +164,10 @@ const days = computed(()=>{
             }
         )
     }
-    for (let i = 1; i < currentMonthMaxDays.value; i++) {
+    for (let i = 1; i < currentMonthMaxDays.value + 1; i++) {
         currDays.push(
             {
+                date: new Date(currentYear.value, currentMonth.value, i),
                 dayIndex: i,
                 isCurrentMonth: true,
                 selected: -1,
@@ -160,6 +184,7 @@ const days = computed(()=>{
     for (let i = 1; i < nextMonthDays; i++) {
         postDays.push(
             {
+                date: new Date(currentYear.value, currentMonth.value + 1, i),
                 dayIndex: i,
                 isCurrentMonth: false,
                 selected: -1,
@@ -265,6 +290,42 @@ const days = computed(()=>{
                     .day
                         background-color: var(--color-primary)
                         color: var(--color-on-primary)
+                &.sub-selected
+                    .day
+                        background-color: var(--color-accent)
+                        color: var(--color-on-primary)
+                        border-radius: 0px
+                &.end-row.sub-selected,
+                &.end-row.selected
+                    .day
+                        border-radius: 0px
+                        border-top-right-radius: var(--radius-m)
+                        border-bottom-right-radius: var(--radius-m)
+                &.start-row.sub-selected,
+                &.start-row.selected
+                    .day
+                        border-radius: 0px
+                        border-top-left-radius: var(--radius-m)
+                        border-bottom-left-radius: var(--radius-m)
+
+                &.start-row,
+                &.end-row,
+                    &.sub-selected
+                        .day
+                            width: calc(var(--local-button-size) + .5rem)
+                &.start-row
+                    &.selected,
+                    &.sub-selected
+                        .day
+                            width: calc(var(--local-button-size) + .25rem)
+                            transform: translateX(.25rem)
+                &.end-row
+                    &.selected,
+                    &.sub-selected
+                        .day
+                            width: calc(var(--local-button-size) + .25rem)
+                            transform: translateX(-.25rem)
+
 
         .apply-section
             display: flex
