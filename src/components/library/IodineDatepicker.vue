@@ -281,7 +281,6 @@ const days = computed(()=>{
                     &:hover
                         background: var(--color-background-soft)
                         color: var(--color-text-soft)
-                        
                 &.current-day
                     .day
                         background-color: var(--color-background-soft)
@@ -292,8 +291,9 @@ const days = computed(()=>{
                         color: var(--color-on-primary)
                 &.sub-selected
                     .day
-                        background-color: var(--color-accent)
+                        background-color: rgba(235, 59, 90, .5)
                         color: var(--color-on-primary)
+                        width: calc(var(--local-button-size) + .5rem)
                         border-radius: 0px
                 &.end-row.sub-selected,
                 &.end-row.selected
@@ -307,24 +307,16 @@ const days = computed(()=>{
                         border-radius: 0px
                         border-top-left-radius: var(--radius-m)
                         border-bottom-left-radius: var(--radius-m)
-
-                &.start-row,
-                &.end-row,
-                    &.sub-selected
-                        .day
-                            width: calc(var(--local-button-size) + .5rem)
-                &.start-row
-                    &.selected,
-                    &.sub-selected
+                &.selected,
+                &.sub-selected
+                    &.start-row
                         .day
                             width: calc(var(--local-button-size) + .25rem)
-                            transform: translateX(.25rem)
-                &.end-row
-                    &.selected,
-                    &.sub-selected
+                            transform: translateX(.125rem)
+                    &.end-row
                         .day
                             width: calc(var(--local-button-size) + .25rem)
-                            transform: translateX(-.25rem)
+                            transform: translateX(-.125rem)
 
 
         .apply-section
