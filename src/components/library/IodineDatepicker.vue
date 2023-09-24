@@ -19,7 +19,9 @@
                         'end-row': isEndRow(i, day.date) && !isStartRow(i, day.date),
                     }
                 ]">
-                <button type="button" class="day" :label="day.dayIndex.toString()" @click="selectDay(day)">{{day.dayIndex}}</button>
+                <button type="button" class="day" :label="day.dayIndex.toString()" @click="selectDay(day)">
+                    <div class="text">{{day.dayIndex}}</div>
+                </button>
             </div>
         </div>
         <div class="apply-section">
@@ -280,14 +282,14 @@ const days = computed(()=>{
                         color: var(--color-text-soft-disabled)
 
                 .day
+                    flex: 1
                     height: var(--local-button-size)
-                    aspect-ratio: 1
                     padding: 0
-                    margin: 0
+                    margin: 0 .25rem
+                    border-radius: var(--radius-m)
                     display: flex
                     align-items: center
                     justify-content: center
-                    border-radius: var(--radius-m)
                     background: transparent
                     border: none
                     font-family: inherit
@@ -295,45 +297,68 @@ const days = computed(()=>{
                     cursor: pointer
                     color: var(--color-text-soft)
 
+                    .text
+                        display: flex
+                        align-items: center
+                        justify-content: center
+                        color: inherit
+                        background: transparent
+                        border-radius: var(--radius-m)
+                        width: var(--local-button-size)
+                        height: var(--local-button-size)
+
                     &:hover
-                        background: var(--color-background-soft)
                         color: var(--color-text-soft)
+
+                        .text
+                            background: var(--color-background-soft)
+
                 &.current-day
                     .day
-                        background-color: var(--color-background-soft)
+                        .text
+                            background-color: var(--color-background-soft)
 
                 &.selected
                     .day
-                        background-color: var(--color-primary)
+                        background-color: var(--color-background-soft)
                         color: var(--color-on-primary)
+
+                        .text
+                            background-color: var(--color-primary)
+
                 &.sub-selected
                     .day
-                        background-color: rgba(235, 59, 90, .5)
-                        color: var(--color-on-primary)
-                        width: calc(var(--local-button-size) + .5rem)
-                        border-radius: 0px
-                &.end-row.sub-selected,
-                &.end-row.selected
-                    .day
-                        border-radius: 0px
-                        border-top-right-radius: var(--radius-m)
-                        border-bottom-right-radius: var(--radius-m)
-                &.start-row.sub-selected,
-                &.start-row.selected
-                    .day
-                        border-radius: 0px
-                        border-top-left-radius: var(--radius-m)
-                        border-bottom-left-radius: var(--radius-m)
+                        background-color: var(--color-background-soft)
+                        color: var(--color-text)
+
                 &.selected,
                 &.sub-selected
-                    &.start-row
+                    &:not(.start-row)
                         .day
-                            width: calc(var(--local-button-size) + .25rem)
-                            transform: translateX(.125rem)
-                    &.end-row
+                            margin-left: 0
+                            justify-content: flex-end
+                            border-top-left-radius: 0
+                            border-bottom-left-radius: 0
+
+                    &:not(.end-row)
                         .day
-                            width: calc(var(--local-button-size) + .25rem)
-                            transform: translateX(-.125rem)
+                            margin-right: 0
+                            justify-content: flex-start
+                            border-top-right-radius: 0
+                            border-bottom-right-radius: 0
+
+                &.selected
+                    &:not(.start-row):not(.end-row)
+                        .day
+                            border-radius: var(--radius-m)
+                            margin: 0 .25rem
+
+                &.sub-selected
+                    &:not(.start-row):not(.end-row)
+                        .day
+                            border-radius: 0
+                            margin: 0
+                            justify-content: center
 
 
         .apply-section
