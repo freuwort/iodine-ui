@@ -12,7 +12,7 @@
             <div class="day-wrapper" v-for="day, i in days" :key="i" :class="[
                     day.isCurrentMonth ? 'current-month' : 'other-month',
                     {
-                        'selected': selectedDays.find((date : Date | undefined) => date?.getTime() === day.date.getTime()),
+                        'selected': isSelected(day.date),
                         'current-day': day.isCurrentDay,
                         'sub-selected': isSubSelected(day.date),
                         'start-row': isStartRow(i, day.date) && !isEndRow(i, day.date),
@@ -25,7 +25,7 @@
             </div>
         </div>
         <div class="apply-section">
-            <IodButton type="button" label="Apply" variant="contained"/>
+            <IodButton type="button" label="Apply" variant="contained" @click="apply"/>
         </div>
     </div>
 </template>
@@ -36,7 +36,18 @@
 <script setup lang="ts">
 import IodButton from '@/components/library/IodineButton.vue'
 import IodIconButton from '@/components/library/IodineIconButton.vue'
-import { computed, ref } from 'vue';
+import { PropType, Ref, computed, onBeforeMount, onMounted, ref, watch } from 'vue';
+
+const props = defineProps({
+        modelValue: {
+            type: null as unknown as PropType<(Date|undefined)[] | (Date|undefined)>,
+            default: ()=> [undefined, undefined]
+        },
+        dateRange: {
+            type: Boolean,
+            default: false
+        }
+})
 
 function nudgeMonth(nudge: number) {
     let year = currentTime.value.getFullYear()
@@ -55,20 +66,37 @@ function nudgeMonth(nudge: number) {
     currentTime.value = new Date(year, month, date)
 }
 
+function isSelected(day: Date)
+{
+    return selectedDays.value.find((date : Date | undefined) => {
+        return dateEquals(date, day)
+    })
+}
+
+function dateEquals(a: Date|undefined, b: Date|undefined) {
+    if(a === undefined && b === undefined) return true // both undefined
+    if(a === undefined || b === undefined) return false // one undefined
+    return a.getFullYear() === b.getFullYear() &&
+        a.getMonth() === b.getMonth() &&
+        a.getDate() === b.getDate() // both defined
+}
+
 function isStartRow(i: number, date: Date)
 {
+    if(!props.dateRange) return false
     if(i%7 === 0) return true
     if(!selectedDays.value[0]) return false
     if(!selectedDays.value[1]) return false
-    return Math.min(selectedDays.value[0].getTime(), selectedDays.value[1].getTime()) === date.getTime()
+    return dateEquals(new Date(Math.min(selectedDays.value[0].getTime(), selectedDays.value[1].getTime())) , date)
 }
 
 function isEndRow(i: number, date: Date)
 {
+    if(!props.dateRange) return false
     if(i%7 === 6) return true
     if(!selectedDays.value[0]) return false
     if(!selectedDays.value[1]) return false
-    return Math.max(selectedDays.value[0].getTime(), selectedDays.value[1].getTime()) === date.getTime()
+    return dateEquals(new Date(Math.max(selectedDays.value[0].getTime(), selectedDays.value[1].getTime())) , date)
 }
 
 
@@ -87,20 +115,26 @@ function isSubSelected(date: Date) {
 }
 
 function selectDay(day: {
-    date: Date,
-    dayIndex: number,
-    isCurrentMonth: boolean,
-    selected: number,
-    isCurrentDay: boolean
+    date: Date
 })
 {
-    if(selectFirstDate) {
+    if(selectFirstDate || !props.dateRange) {
         selectedDays.value[0] = day.date
         selectFirstDate = false
     } else {
         selectedDays.value[1] = day.date
         selectFirstDate = true
     }
+    if(!props.dateRange)
+    {
+        emits('update:modelValue', selectedDays.value[0])
+    }
+    else
+    {
+        let sortedTimestamps = [...selectedDays.value].sort((a, b) => a?.getTime() || 0 - (b?.getTime() || 0))
+        emits('update:modelValue', sortedTimestamps)
+    }
+    console.log(selectedDays.value)
 }
 
 function getWeekDays(locale: Intl.LocalesArgument)
@@ -117,7 +151,8 @@ function getWeekDays(locale: Intl.LocalesArgument)
 
 const weekDayAbbreviations = getWeekDays('de-DE')
 
-const selectedDays = ref([undefined, undefined] as (Date|undefined)[])
+const selectedDays: Ref<(Date|undefined)[]> = ref([undefined, undefined])
+
 let selectFirstDate = true;
 
 const currentLiveTime = new Date()
@@ -222,6 +257,34 @@ const days = computed(()=>{
 
     return days
 })
+
+
+function apply() {
+    emits('apply')
+}
+
+onMounted(() => {
+    if(Array.isArray(props.modelValue)) {
+        if(props.modelValue[0])
+        {
+            selectDay({date: props.modelValue[0]})
+        }
+        if(props.modelValue[1])
+        {
+            selectDay({date: props.modelValue[1]})
+        }
+    } else {
+        if(props.modelValue)
+        {
+            selectDay({date: props.modelValue})
+        }
+    }
+})
+
+const emits = defineEmits([
+    'update:modelValue',
+    'apply',
+])
 
 </script>
 

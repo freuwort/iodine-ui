@@ -276,6 +276,7 @@
                         <IodineColorpicker :swatch-palettes="swatchPalettes">
                             <IodineButton type="button" label="Open Colopicker"/>
                         </IodineColorpicker>
+                        <IodineDatepicker date-range v-model="datePickerDate"/>
                         <IodineDatepicker/>
                     </div>
                 </div>
@@ -313,7 +314,7 @@
 </template>
 
 <script setup lang="ts">
-    import { ref } from 'vue'
+    import { computed, ref } from 'vue'
     
     import IodineIcon from '@/components/library/IodineIcon.vue'
     import IodineButton from '@/components/library/IodineButton.vue'
@@ -334,7 +335,14 @@
     import icons from '@/components/data/icons/MaterialSymbols'
     
 
-
+    const datePickerDate = ref(new Date() as (Date|undefined)[] | (Date|undefined))
+    const datePickerString = computed(() => {
+        if (Array.isArray(datePickerDate.value)) {
+            return datePickerDate.value.map(date => date?.toLocaleDateString()).join(', ')
+        } else {
+            return datePickerDate.value?.toLocaleDateString()
+        }
+    })
     const popup = ref({} as typeof IodinePopup)
     const bool = ref(false)
     const selectOptions = ref([
