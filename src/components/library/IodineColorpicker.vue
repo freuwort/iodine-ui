@@ -10,7 +10,8 @@
         </div>
 
         <div class="slider-layout">
-            <button class="eyedropper-toggle">colorize</button>
+            <button type="button" class="color-output-button" :data-test="fullAlphaColorString" :style="{ color: fullAlphaColorString }" :title="computedColor" @click="copyToClipboard(computedColor)"></button>
+
             <div class="slider-wrapper hue">
                 <div class="background"></div>
                 <div class="handle-wrapper">
@@ -47,11 +48,11 @@
             </div>
         </div>
 
-        <div class="swatch-layout">
+        <div class="swatch-layout" v-if="props.swatchPalettes">
             <IodineSelect class="swatchSelector" placeholder="Select a palette" v-model="swatchPalette" :options="
                 props.swatchPalettes?.map(e => ({ value: e.id, text: e.name })) ?? []
             "/>
-            <div class="grid">
+            <div class="grid" v-if="selectedSwatchPalette.colors.length">
                 <div class="swatch" v-for="swatch in selectedSwatchPalette.colors" :key="swatch.hex"
                     :style="`background: ${swatch.hex};`" @click="changeColorHEX(swatch.hex)"></div>
             </div>
@@ -428,6 +429,11 @@ const fullColorString = computed((): string => {
     return `hsl(${hslColor.hue * 360}deg ${hslColor.saturation * 100}% ${hslColor.lightness * 100}%)`
 })
 
+const fullAlphaColorString = computed((): string => {
+    let hslColor = hsb2hsl(color.value)
+    return `hsla(${hslColor.hue * 360}deg, ${hslColor.saturation * 100}%, ${hslColor.lightness * 100}%, ${color.value.alpha})`
+})
+
 const fullHexColorString = computed((): string => {
     return rgb2hex(hsb2rgb(color.value)).hex
 })
@@ -683,6 +689,11 @@ function setColor(c: RGBColor | HSBColor | HSLColor | HexColor | string)
 
 }
 
+function copyToClipboard(value: string): void
+{
+    navigator.clipboard.writeText(value)
+}
+
 watch(computedColor, updateModelValue);
 watch(computedAlpha, updateModelValue);
 
@@ -712,9 +723,10 @@ let emits = defineEmits(['update:modelValue'])
     .iod-container.iod-colorpicker
         background: var(--color-background)
         border-radius: var(--radius-m)
-        padding: .5rem 0
+        padding-top: .5rem
         border: 1px solid var(--color-border)
         width: 320px
+        height: fit-content
         display: flex
         flex-direction: column
         box-sizing: border-box
@@ -737,7 +749,6 @@ let emits = defineEmits(['update:modelValue'])
             aspect-ratio: 1
             position: relative
             border-top: 1px solid var(--color-border)
-            border-bottom: 1px solid var(--color-border)
 
             .handle
                 transform: translate(-50%, -50%)
@@ -832,40 +843,52 @@ let emits = defineEmits(['update:modelValue'])
             display: grid
             grid-template-columns: auto 1fr
             grid-template-rows: 1fr 1fr
-            grid-template-areas: 'eyedropper hue' 'eyedropper alpha'
+            grid-template-areas: 'coloroutput hue' 'coloroutput alpha'
             align-items: center
             padding: 1rem
             gap: 1rem
-            border-bottom: 1px solid var(--color-border)
+            border-top: 1px solid var(--color-border)
 
-            .eyedropper-toggle
-                grid-area: eyedropper
+            .color-output-button
+                grid-area: coloroutput
+                position: relative
                 aspect-ratio: 1
                 width: 2.5rem
                 display: flex
                 align-items: center
                 justify-content: center
-                font-family: var(--font-icon)
-                font-size: 1.4rem
-                line-height: 1
-                color: var(--color-text-soft)
-                background: var(--color-background)
-                border-radius: var(--radius-s)
+                --height: 16px
+                background-color: white
+                background-image: linear-gradient(45deg, #b4b4b4 25%, transparent 25%), linear-gradient(-45deg, #b4b4b4 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #b4b4b4 75%), linear-gradient(-45deg, transparent 75%, #b4b4b4 75%)
+                background-size: calc(var(--height) / 2) calc(var(--height) / 2)
+                background-position: 0 0, 0 calc(var(--height) / 4), calc(var(--height) / 4) calc(var(--height) / 4 * -1), calc(var(--height) / 4 * -1) 0px
+                border-radius: 50%
                 padding: 0
                 border: none
                 cursor: pointer
                 user-select: none
+                border: 1px solid var(--color-border)
+                transition: transform 80ms ease-in-out
+
+                &::after
+                    content: ''
+                    position: absolute
+                    top: 0
+                    left: 0
+                    bottom: 0
+                    right: 0
+                    border-radius: inherit
+                    background: currentColor
 
                 &:hover
-                    background: var(--color-background-soft)
-                    color: var(--color-text)
+                    transform: scale(1.1)
 
         .output-layout
             display: flex
             align-items: center
             padding: 1rem
             gap: 1rem
-            border-bottom: 1px solid var(--color-border)
+            border-top: 1px solid var(--color-border)
 
             .sub-layout
                 flex: 1
@@ -895,7 +918,7 @@ let emits = defineEmits(['update:modelValue'])
                 --local-padding: .25rem
 
         .swatch-layout
-            border-bottom: 1px solid var(--color-border)
+            border-top: 1px solid var(--color-border)
             display: flex
             flex-direction: column
             gap: 1rem
