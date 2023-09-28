@@ -549,7 +549,7 @@ function hsb2rgb (color: HSBColor): RGBColor
         r = g = b = brightness
     }
     else {
-        let h = hue * 360 / 60
+        let h = (hue * 360 / 60) % 6
         let i = Math.floor(h)
         let f = h - i
         let p = brightness * (1 - saturation)
