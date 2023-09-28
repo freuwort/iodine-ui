@@ -273,7 +273,9 @@
                         <IodineIconpicker :icons="icons">
                             <IodineButton type="button" label="Open Iconpicker"/>
                         </IodineIconpicker>
-                        <IodineColorpicker :swatch-palettes="swatchPalettes">
+                        <IodineColorpicker :swatch-palettes="swatchPalettes"
+                        :allowed-output-formats="['rgb']"
+                        :model-value="'#FF00FF'">
                             <IodineButton type="button" label="Open Colopicker"/>
                         </IodineColorpicker>
                     </div>
