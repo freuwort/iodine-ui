@@ -455,6 +455,7 @@ function setFocus()
   box-shadow: var(--shadow-elevation-medium)
 
   .select-dropdown-item
+    position: relative
     width: 100%
     min-height: 2.5rem
     padding-inline: 1rem
