@@ -35,6 +35,7 @@
         <!-- Mousedown instead of click due to event ordering. Prevents hiding of elements to interfere with this event dispatch -->
         <button
           class="select-dropdown-item"
+          type="button"
           v-for="(option, i) in props.options"
           :key="i"
           :tabindex="popoverComponent?.showing ? 0 : -1"
