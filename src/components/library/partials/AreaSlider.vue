@@ -8,8 +8,10 @@
 
 
     const emits = defineEmits([
-        'update:x',
-        'update:y',
+        'update:x',  // (dragX)
+        'update:y',  // (dragY)
+        'dragStart', // (dragX, dragY)
+        'dragEnd',   // (dragX, dragY)
     ])
 
     const props = defineProps({
@@ -24,6 +26,10 @@
         padding: {
             type: Number,
             default: 0,
+        },
+        unboundCoords: {
+            type: Boolean,
+            default: false,
         },
     })
 
@@ -41,6 +47,7 @@
         window.addEventListener('mousemove', handleMouseMove)
         window.addEventListener('mouseup', handleMouseUp)
 
+
         let rect = container.value.getBoundingClientRect()
 
         // Calculate the position of the mouse relative to the container respecting the padding
@@ -52,6 +59,7 @@
             y: Math.max(0, Math.min(1, y)),
         }
 
+        emits('dragStart', position.value.x, position.value.y)
         emits('update:x', position.value.x)
         emits('update:y', position.value.y)
     }
@@ -63,19 +71,29 @@
         let x = (event.clientX - rect.left - props.padding) / (rect.width - props.padding * 2)
         let y = (event.clientY - rect.top - props.padding) / (rect.height - props.padding * 2)
 
-        position.value = {
-            x: Math.max(0, Math.min(1, x)),
-            y: Math.max(0, Math.min(1, y)),
+        if(props.unboundCoords)
+        {
+            position.value = {
+                x: x,
+                y: y,
+            }
+        }else{
+            position.value = {
+                x: Math.max(0, Math.min(1, x)),
+                y: Math.max(0, Math.min(1, y)),
+            }
         }
-        
+
         emits('update:x', position.value.x)
         emits('update:y', position.value.y)
     }
 
-    const handleMouseUp = () => {
+    const handleMouseUp = (event: MouseEvent) => {
         isDragging.value = false
         window.removeEventListener('mousemove', handleMouseMove)
         window.removeEventListener('mouseup', handleMouseUp)
+
+        emits('dragEnd', position.value.x, position.value.y)
     }
 
 

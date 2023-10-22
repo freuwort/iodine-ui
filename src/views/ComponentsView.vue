@@ -279,6 +279,13 @@
                         <IodineDatepicker date-range v-model="datePickerDate"/>
                         <IodineDatepicker/>
                     </div>
+                    <div class="flex gap-1">
+                        <IodineCarousel>
+                            <div v-for="num in 24" :key="num">
+                                {{ num }}
+                            </div>
+                        </IodineCarousel>
+                    </div>
                 </div>
                 <div class="group">
                     <h2>Lynn's Playground</h2>
@@ -326,6 +333,7 @@
     import IodineColorpicker from '@/components/library/IodineColorpicker.vue'
     import IodineDatepicker from '@/components/library/IodineDatepicker.vue'
     import IodineIconpicker from '@/components/library/IodineIconpicker.vue'
+    import IodineCarousel from '@/components/library/IodineCarousel.vue'
 
     import IodineSelect from '@/components/library/IodineSelect.vue'
 
