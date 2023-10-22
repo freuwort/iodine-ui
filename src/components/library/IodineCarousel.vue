@@ -23,16 +23,50 @@
 import { Ref, VNode, computed, nextTick, onMounted, ref, useSlots, watch } from 'vue';
 import AreaSlider from './partials/AreaSlider.vue'
 
+    //INERTIA SETTINGS
+        const inertiaMultiplier = 5
+        const inertiaCutoff = 0.3
+        const inertiaDampening = 0.6
+    //END INERTIA SETTINGS
 
-    const items = ref([]) as Ref<VNode[]>
+    const showItemCount = ref(5)
+    const currentIndex = ref(0)
+    const props = defineProps({
+        size: {
+            type: Number,
+            default: 5
+        },
+        startIndex: {
+            type: Number,
+            default: 0
+        }
+    })
 
-    let dragY = 0
-    let inertia = 0
+    //REACTIVE VARIABLES
+        const items = ref([]) as Ref<VNode[]>
+        const snap = ref(0)
+        const container = ref(null as unknown as HTMLDivElement | null)
+    //END REACTIVE VARIABLES
+
+    //LOCAL VARIABLES
+        let dragY = 0
+        let inertia = 0
+        let snapIndexUpper = 0
+        let snapIndexLower = 0
+    //END LOCAL VARIABLES
+
+    //COMPUTED
+        const rotatedBy = computed(()=>{
+            if(!container.value) return 0
+            return -currentIndex.value - (showItemCount.value-1) / 2 - 1
+        })
+    //END COMPUTED
+
     function animateInertia()
     {
-        if(Math.abs(inertia) > 0.3)
+        if(Math.abs(inertia) > inertiaCutoff)
         {
-            inertia *= 0.6
+            inertia *= inertiaDampening
             currentIndex.value -= inertia
             setTimeout(animateInertia, 200);
         }
@@ -52,7 +86,7 @@ import AreaSlider from './partials/AreaSlider.vue'
         withoutAnimation(()=>{
             currentIndex.value -= diff * showItemCount.value
         })
-        inertia = diff * showItemCount.value * 5
+        inertia = diff * showItemCount.value * inertiaMultiplier
         dragY = y
     }
     function dragEnd(x: number, y: number){
@@ -66,40 +100,27 @@ import AreaSlider from './partials/AreaSlider.vue'
             currentIndex.value = Math.round(currentIndex.value)
         }
     }
-
-    const showItemCount = ref(5)
-    const currentIndex = ref(0)
-    const snap = ref(0)
-
-    let snapIndexUpper = 0
-    let snapIndexLower = 0
-
-    const container = ref(null as unknown as HTMLDivElement | null)
-
-    const rotatedBy = computed(()=>{
-        if(!container.value) return 0
-        return -currentIndex.value - (showItemCount.value-1) / 2 - 1
-    })
-
     function disableAnimation(){
         if(!container.value) return
         container.value.classList.add('snappy')
     }
-
     function flushAndReenableAnimation(){
         if(!container.value) return
         container.value.offsetHeight; // Trigger a reflow, flushing the CSS changes
         container.value.classList.remove('snappy')
     }
-
     function withoutAnimation(callback: () => void){
         disableAnimation()
         callback()
         flushAndReenableAnimation()
     }
 
-    const slots = useSlots()
     onMounted(() => {
+
+        showItemCount.value = props.size
+        currentIndex.value = props.startIndex
+
+        const slots = useSlots()
         const defaultSlotItems = slots.default?.();
         if (defaultSlotItems) {
             items.value = [...defaultSlotItems]

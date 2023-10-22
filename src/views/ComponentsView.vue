@@ -280,9 +280,9 @@
                         <IodineDatepicker/>
                     </div>
                     <div class="flex gap-1">
-                        <IodineCarousel>
+                        <IodineCarousel :size="5">
                             <div v-for="num in 24" :key="num">
-                                {{ num }}
+                                {{ num > 9 ? num : '0' + num }}
                             </div>
                         </IodineCarousel>
                     </div>
