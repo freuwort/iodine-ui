@@ -138,13 +138,35 @@ import AreaSlider from './partials/AreaSlider.vue'
         }
     })
 
+    watch(() => props.index, (x) => {
+
+        //calculate the closest index.
+        if(!container.value) return;
+        let possibleIndex = x
+        let otherPossibleIndex = x + container.value.childElementCount / 2
+
+        if(Math.abs(possibleIndex - currentIndex.value) > Math.abs(otherPossibleIndex - currentIndex.value))
+        {
+            possibleIndex = otherPossibleIndex
+        }
+
+        currentIndex.value = possibleIndex
+        inertia = 0;
+    })
+
     watch(currentIndex, (newIndex, lastIndex) => {
         if(!container.value) return
-        const newIndexNormalized = Math.round(newIndex) % (container.value.childElementCount / 2);
+        let newIndexNormalized = Math.round(newIndex) % (container.value.childElementCount / 2);
         const lastIndexNormalized = Math.round(lastIndex) % (container.value.childElementCount / 2);
         if(newIndexNormalized !== lastIndexNormalized) 
         {
-            emits('update:index', newIndexNormalized)
+            if(newIndexNormalized < 0)
+            {
+                newIndexNormalized += container.value.childElementCount / 2
+            }
+            if(!Number.isNaN(newIndexNormalized)){
+                emits('update:index', newIndexNormalized)
+            }
         }
         if(newIndex > snapIndexUpper)
         {

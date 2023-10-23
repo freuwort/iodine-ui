@@ -280,13 +280,8 @@
                         <IodineDatepicker/>
                     </div>
                     <div class="flex gap-1">
-                        <IodineCarousel :size="5" v-model:index="carouselIndex">
-                            <div v-for="num in 24" :key="num">
-                                {{ num > 9 ? num : '0' + num }}
-                            </div>
-                        </IodineCarousel>
-                        <div>{{ carouselIndex }}
-                        </div>
+                        <IodineTimepicker seconds uses-am-pm v-model="timepickerString"/>
+                        <div>{{ timepickerString }}</div>
                     </div>
                 </div>
                 <div class="group">
@@ -334,6 +329,7 @@
     import IodinePopup from '@/components/library/IodinePopup.vue'
     import IodineColorpicker from '@/components/library/IodineColorpicker.vue'
     import IodineDatepicker from '@/components/library/IodineDatepicker.vue'
+    import IodineTimepicker from '@/components/library/IodineTimepicker.vue'
     import IodineIconpicker from '@/components/library/IodineIconpicker.vue'
     import IodineCarousel from '@/components/library/IodineCarousel.vue'
 
@@ -353,7 +349,7 @@
             return datePickerDate.value?.toLocaleDateString()
         }
     })
-    const carouselIndex = ref(0)
+    const timepickerString = ref('12:34:56')
     const popup = ref({} as typeof IodinePopup)
     const bool = ref(false)
     const selectOptions = ref([
