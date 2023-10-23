@@ -36,11 +36,15 @@ import AreaSlider from './partials/AreaSlider.vue'
             type: Number,
             default: 5
         },
-        startIndex: {
+        index: {
             type: Number,
             default: 0
         }
     })
+
+    const emits = defineEmits([
+        'update:index'
+    ])
 
     //REACTIVE VARIABLES
         const items = ref([]) as Ref<VNode[]>
@@ -118,7 +122,7 @@ import AreaSlider from './partials/AreaSlider.vue'
     onMounted(() => {
 
         showItemCount.value = props.size
-        currentIndex.value = props.startIndex
+        currentIndex.value = props.index
 
         const slots = useSlots()
         const defaultSlotItems = slots.default?.();
@@ -136,6 +140,12 @@ import AreaSlider from './partials/AreaSlider.vue'
 
     watch(currentIndex, (newIndex, lastIndex) => {
         if(!container.value) return
+        const newIndexNormalized = Math.round(newIndex) % (container.value.childElementCount / 2);
+        const lastIndexNormalized = Math.round(lastIndex) % (container.value.childElementCount / 2);
+        if(newIndexNormalized !== lastIndexNormalized) 
+        {
+            emits('update:index', newIndexNormalized)
+        }
         if(newIndex > snapIndexUpper)
         {
             snap.value += container.value.childElementCount / 2

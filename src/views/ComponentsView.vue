@@ -280,11 +280,13 @@
                         <IodineDatepicker/>
                     </div>
                     <div class="flex gap-1">
-                        <IodineCarousel :size="5">
+                        <IodineCarousel :size="5" v-model:index="carouselIndex">
                             <div v-for="num in 24" :key="num">
                                 {{ num > 9 ? num : '0' + num }}
                             </div>
                         </IodineCarousel>
+                        <div>{{ carouselIndex }}
+                        </div>
                     </div>
                 </div>
                 <div class="group">
@@ -351,6 +353,7 @@
             return datePickerDate.value?.toLocaleDateString()
         }
     })
+    const carouselIndex = ref(0)
     const popup = ref({} as typeof IodinePopup)
     const bool = ref(false)
     const selectOptions = ref([
