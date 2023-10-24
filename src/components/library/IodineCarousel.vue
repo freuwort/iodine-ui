@@ -53,6 +53,7 @@ import AreaSlider from './partials/AreaSlider.vue'
     //END REACTIVE VARIABLES
 
     //LOCAL VARIABLES
+        let dragging = false
         let dragY = 0
         let inertia = 0
         let snapIndexUpper = 0
@@ -77,12 +78,15 @@ import AreaSlider from './partials/AreaSlider.vue'
         else
         {
             currentIndex.value = Math.round(currentIndex.value)
-            container.value?.classList.remove('smooth')
+            if(!container.value) return
+            container.value.classList.remove('smooth')
         }
     }
     function dragStart(x: number, y: number){
         dragY = y
-        container.value?.classList.remove('smooth')
+        dragging = true
+        if(!container.value) return
+        container.value.classList.add('snappy')
         inertia = 0
     }
     function yDragged(y: number){
@@ -94,9 +98,10 @@ import AreaSlider from './partials/AreaSlider.vue'
         dragY = y
     }
     function dragEnd(x: number, y: number){
+        dragging = false
         if(Math.abs(inertia) > 1)
         {
-            container.value?.classList.add('smooth')
+            container.value?.classList.remove('snappy')
             animateInertia()
         }
         else
@@ -163,6 +168,7 @@ import AreaSlider from './partials/AreaSlider.vue'
             possibleIndex = otherPossibleIndex
         }
 
+        if(dragging) return
         currentIndex.value = possibleIndex
         inertia = 0;
     })
