@@ -4,11 +4,12 @@
             '--items': showItemCount,
             '--snap': snap
         }">
-        <area-slider  @wheel="handleWheel" :style="{
+        <area-slider :style="{
             width: '100%',
             height: '100%',
         }"
         unbound-coords
+        @wheel="handleWheel"
         @update:y="yDragged"
         @drag-start="dragStart"
         @drag-end="dragEnd" />
@@ -71,6 +72,24 @@ import AreaSlider from './partials/AreaSlider.vue'
         })
     //END COMPUTED
 
+
+    //TODO: figure out how this can not bork up the dragging
+    function handleClick(event: MouseEvent){
+        if(!container.value) return
+
+        //check if this was a drag
+        if(dragging) { return }
+
+        const rect = container.value.parentElement!.getBoundingClientRect()
+        const y = event.clientY
+        const yMin = rect.top
+        const yMax = rect.bottom
+        const yPercent = (y - yMin) / (yMax - yMin)
+
+        const index = Math.round(props.size * yPercent -props.size / 2)
+        currentIndex.value += index
+
+    }
 
     function handleWheel(event: WheelEvent){
         event.preventDefault()
