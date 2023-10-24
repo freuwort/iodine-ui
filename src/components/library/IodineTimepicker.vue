@@ -81,6 +81,10 @@ onMounted(() => {
     const time = props.modelValue.split(':')
     if(!time[0]) { return; }
     mHours.value = parseInt(time[0])
+    if(props.usesAmPm) {
+        mAmPm.value = mHours.value > 11 ? 1 : 0
+        if(mHours.value == 0) mHours.value = 12
+    }
     if(!time[1]) { return; }
     mMinutes.value = parseInt(time[1])
     if(!time[2]) { return; }

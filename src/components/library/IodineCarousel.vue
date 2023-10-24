@@ -123,17 +123,30 @@ import AreaSlider from './partials/AreaSlider.vue'
 
         showItemCount.value = props.size
         currentIndex.value = props.index
-
         const slots = useSlots()
         const defaultSlotItems = slots.default?.();
         if (defaultSlotItems) {
             items.value = [...defaultSlotItems]
+            currentIndex.value = props.index % items.value.length
             items.value.push(...defaultSlotItems)
             nextTick(() => {
                 if(!container.value) return
                 snap.value = -container.value.childElementCount / 2
                 snapIndexUpper = container.value.childElementCount / 4
                 snapIndexLower = -container.value.childElementCount / 4
+
+                if(currentIndex.value > snapIndexUpper)
+                {
+                    snap.value += container.value.childElementCount / 2
+                    snapIndexUpper += container.value.childElementCount / 2
+                    snapIndexLower += container.value.childElementCount / 2
+                }
+                else if(currentIndex.value < snapIndexLower)
+                {
+                    snap.value -= container.value.childElementCount / 2
+                    snapIndexUpper -= container.value.childElementCount / 2
+                    snapIndexLower -= container.value.childElementCount / 2
+                }
             })
         }
     })
