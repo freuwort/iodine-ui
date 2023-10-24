@@ -1,25 +1,25 @@
 <template>
     <div class="iod-container iod-timepicker">
         <div class="picker">
-            <IodineCarousel :size="5" v-model:index="mHours" v-if="hours">
+            <IodineCarousel :size="5" v-model:index="mHours" :invert-scroll-direction="invertScrollDirection" v-if="hours">
                 <div v-for="num in usesAmPm ? 12 : 24" :key="num">
                     {{ (num - (usesAmPm ? 0 : 1)) > 9 ? (num - (usesAmPm ? 0 : 1)) : '0' + (num - (usesAmPm ? 0 : 1)) }}
                 </div>
             </IodineCarousel>
             <div class="text-decoration" v-if="hours && minutes">:</div>
-            <IodineCarousel :size="5" v-model:index="mMinutes" v-if="minutes">
+            <IodineCarousel :size="5" v-model:index="mMinutes" :invert-scroll-direction="invertScrollDirection" v-if="minutes">
                 <div v-for="num in 60" :key="num">
                     {{ (num-1) > 9 ? (num-1) : '0' + (num-1) }}
                 </div>
             </IodineCarousel>
             <div class="text-decoration" v-if="minutes && seconds">:</div>
-            <IodineCarousel :size="5" v-model:index="mSeconds" v-if="seconds">
+            <IodineCarousel :size="5" v-model:index="mSeconds" :invert-scroll-direction="invertScrollDirection" v-if="seconds">
                 <div v-for="num in 60" :key="num">
                     {{ (num-1) > 9 ? (num-1) : '0' + (num-1) }}
                 </div>
             </IodineCarousel>
             <div class="text-decoration"></div>
-            <IodineCarousel :size="3" v-model:index="mAmPm" v-if="usesAmPm">
+            <IodineCarousel :size="3" v-model:index="mAmPm" :invert-scroll-direction="invertScrollDirection" v-if="usesAmPm">
                 <div>AM</div>
                 <div>PM</div>
                 <div>AM</div>
@@ -61,6 +61,10 @@ const props = defineProps({
         type: Boolean,
         default: false
     },
+    invertScrollDirection: {
+        type: Boolean,
+        default: false
+    }
 })
 
 const mHours = ref(0);

@@ -4,7 +4,7 @@
             '--items': showItemCount,
             '--snap': snap
         }">
-        <area-slider :style="{
+        <area-slider  @wheel="handleWheel" :style="{
             width: '100%',
             height: '100%',
         }"
@@ -39,6 +39,10 @@ import AreaSlider from './partials/AreaSlider.vue'
         index: {
             type: Number,
             default: 0
+        },
+        invertScrollDirection: {
+            type: Boolean,
+            default: false
         }
     })
 
@@ -66,6 +70,23 @@ import AreaSlider from './partials/AreaSlider.vue'
             return -currentIndex.value - (showItemCount.value-1) / 2 - 1
         })
     //END COMPUTED
+
+
+    function handleWheel(event: WheelEvent){
+        event.preventDefault()
+        let delta = event.deltaY / 100
+        //cap the delta to [-1 , 1]
+        if(delta > 1) delta = 1
+        if(delta < -1) delta = -1
+        if(!props.invertScrollDirection)
+        {
+            currentIndex.value -= delta
+        }
+        else
+        {
+            currentIndex.value += delta
+        }
+    }
 
     function animateInertia()
     {
@@ -251,9 +272,8 @@ import AreaSlider from './partials/AreaSlider.vue'
         flex-direction: column
         justify-content: center
         align-items: center
-        pointer-events: none
         select: none
-
+        pointer-events: none
         transform: translateY(calc(var(--item-height) * var(--rotated-by)))
         top: calc(var(--item-height) * var(--snap))
 
